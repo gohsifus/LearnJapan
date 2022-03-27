@@ -9,6 +9,7 @@ import (
 func init(){
 	http.HandleFunc("/", mainIndex)
 	http.HandleFunc("/dictionary/", dictionaryIndex)
+	http.HandleFunc("/dictionary/oneWord/", getOneCard)
 }
 
 func dictionaryIndex(w http.ResponseWriter, r *http.Request){
@@ -21,7 +22,7 @@ func dictionaryIndex(w http.ResponseWriter, r *http.Request){
 		panic(err)
 	}
 
-	words := models.GetById(12)
+	words := models.GetList()
 
 	err = template.Execute(w, words)
 	if err != nil{
@@ -44,5 +45,19 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 
 		panic(err)
 	}
+}
+
+func getOneCard(w http.ResponseWriter, r *http.Request){
+	files := []string{
+		"./view/html/word.html",
+	}
+
+	word := models.GetById(r.URL.Query().Get("id"))
+	templ, err := template.ParseFiles(files...)
+	if err != nil{
+		panic(err)
+	}
+
+	templ.Execute(w, word)
 }
 
