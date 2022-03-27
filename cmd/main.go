@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "./router"
+	_ "LearnJapan.com/cmd/router"
 	"net/http"
 )
 
