@@ -4,8 +4,9 @@ import(
 	"fmt"
 )
 
-func GetById(id string) JpnCards{
-	rows, err := DB.Query("select * from Cards where id = ?", id)
+//GetCardById Возвращает карточку по id
+func GetCardById(id string) JpnCards{
+	rows, err := DB.Query("select * from Cards where Id = ?", id)
 	if err != nil{
 		panic(fmt.Sprintf("Ошибка выбора даных: %s", err))
 	}
@@ -13,7 +14,7 @@ func GetById(id string) JpnCards{
 
 	card := JpnCards{}
 	if(rows.Next()){
-		rows.Scan(&card.id, &card.inJapan, &card.inRussian, &card.mark, &card.dateAdd)
+		rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 	}
 
 	fmt.Println(id)
@@ -22,7 +23,8 @@ func GetById(id string) JpnCards{
 	return card
 }
 
-func GetList() []JpnCards{
+//GetCardList Возвращает все карточки
+func GetCardList() []JpnCards{
 	rows, err := DB.Query("select * from Cards")
 	if err != nil{
 		panic(fmt.Sprintf("Ошибка выбора даных: %s", err))
@@ -33,11 +35,20 @@ func GetList() []JpnCards{
 
 	for rows.Next(){
 		card := JpnCards{}
-		err = rows.Scan(&card.id, &card.inJapan, &card.inRussian, &card.mark, &card.dateAdd)
+		err = rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 		cards = append(cards, card)
-
-		fmt.Println(card)
 	}
 
 	return cards
+}
+
+//Add добавляет карточку
+func (card *JpnCards) Add() (bool, error){
+	sql := "INSERT INTO cards(inJapan, inRussian, mark, dateAdd) VALUES(?, ?, ?, ?)"
+	_, err := DB.Exec(sql, card.InJapan, card.InRussian, card.Mark, card.DateAdd)
+	if err != nil{
+		return false, err
+	}
+
+	return true, nil
 }

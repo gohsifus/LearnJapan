@@ -1,0 +1,198 @@
+html, body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.header{
+    width: 100%;
+    height: 100%;
+    background-color: brown;
+    background-image: url("/static/images/2.jpg");
+    background-size: cover;
+}
+
+.footer{
+    width: 100%;
+    height: 10%;
+    background-image: url("/static/images/footerBackGround/tree1.jpg");
+}
+
+.container{
+    widht: 100%;
+    height: 90%;
+    background-image: url("/static/images/rootBackground/bamboo.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 200px;
+}
+
+.mainMenu{
+    width: 100%;
+    height: 10%;
+    background-color: black;
+    position: fixed;
+    top: 0px;
+    z-index: 100;
+
+}
+
+.menuItem{
+    color: aliceblue;
+    font-size: 24px;
+    display: inline-block;
+    margin-top: 1em;
+}
+
+.menuItem a {
+    text-decoration: none;
+}
+
+.menuItem a:visited{
+    color: inherit;
+    text-decoration: none;
+}
+
+.searchElement{
+    width: 50%;
+    height: 15%;
+    background-color: aquamarine;
+    margin:20% 0 0 25%;
+    position: absolute;
+}
+
+/*Таблица словарь*/
+.dictionaryTabContainer{
+    height: 65%;
+    padding-top: 7%;
+    padding-left: 10%;
+    padding-right: 10%;
+    border: 2px solid black;
+    box-shadow: 0px 1px 50px 0px white;
+}
+
+.dictionaryTabHeaders{
+    width: 100%;
+    background-color: grey;
+    box-shadow: inset 0 0 2px;
+}
+
+.dictionaryTabHeaders th{
+    text-align: center;
+    padding: 5px;
+    padding-bottom: 15px;
+}
+
+.scrollTable{
+    overflow-x: auto;
+    height: 82%;
+}
+
+.dictionaryTab{
+    width: 100%;
+    background-color: grey;
+    box-shadow: inset 0 0 2px;
+}
+
+.dictionaryTab td{
+    background-color: LightGrey;
+    padding: 5px;
+}
+
+/*Форма добавления слова*/
+.addWordContainer{
+    padding-top: 2%;
+}
+
+.nihonInput{
+    display: inline-block;
+    margin-left: 10%;
+}
+
+.nihonInput input{
+    padding-top: 5px;
+    padding: 5px;
+    font-family: Times New Roman;
+    font-size: 16px;
+    height: 20px;
+    background-color: snow;
+    border-radius: 4px;
+}
+
+.translateIcon{
+    display: inline-block;
+    width: 30px;
+    min-height: 30px;
+    height: 100%;
+    margin: 0 1% 0 1%;
+    vertical-align: top;
+    background-image: url("/static/images/icons/translateIcon.png");
+    background-size: cover;
+}
+
+.russiaInput{
+    display: inline-block;
+}
+
+.russiaInput input{
+    padding: 5px;
+    font-family: Times New Roman;
+    font-size: 16px;
+    height: 20px;
+    background-color: snow;
+    border-radius: 4px;
+}
+
+.addButton{
+    display: inline-block;
+    background-color: white;
+    width: 10%;
+    min-height: 30px;
+    height: 100%;
+    margin-left: 1%;
+    vertical-align: top;
+}
+
+.wordCounter{
+    color: snow;
+    margin: 1% 0 0 10%;
+    font-size: 18px;
+
+}
+
+/*Форма регистрации*/
+.regFormContainer{
+    position: absolute;
+    width: 36%;
+    height: 35%;
+    background-color: white;
+    margin: 15% 0 0 32%;
+    border-radius: 4px;
+    background-image: url("/static/images/rootBackGround/darkWave.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 10px;
+}
+
+.regForm label{
+    display: block;
+    padding: 5px;
+    padding-left: 10px;
+    margin-top: 1%;
+    color: snow;
+    font-size: 18px;
+}
+
+.regForm input{
+    display: block;
+    margin-left: 10px;
+    padding: 5px;
+    width: 40%;
+    background-color: snow;
+    border-radius: 5px
+}
+
+.regButton{
+    display: block;
+    padding: 5px;
+    width: 34%;
+    margin: 4% 0 0 34%;
+}

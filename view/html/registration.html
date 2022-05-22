@@ -1,0 +1,15 @@
+{{template "header"}}
+{{template "mainMenu"}}
+<div class="container" style="height: 100%">
+    <div class="regFormContainer">
+        <form id="regForm" class="regForm" action="/registration/addUser/" method="POST">
+            <label>Login:</label>
+            <input type="text" name="login">
+            <label>Password: </label>
+            <input type="password" name="password">
+            <label>Email: </label>
+            <input type="email" name="email">
+            <button class="regButton" type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
