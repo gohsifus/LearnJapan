@@ -196,3 +196,41 @@ html, body{
     width: 34%;
     margin: 4% 0 0 34%;
 }
+
+/*Форма авторизации*/
+.authFormContainer{
+    position: absolute;
+    width: 36%;
+    height: 35%;
+    background-color: white;
+    margin: 15% 0 0 32%;
+    border-radius: 4px;
+    background-image: url("/static/images/rootBackGround/darkWave.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 10px;
+}
+
+.authForm label{
+    display: block;
+    padding: 5px;
+    padding-left: 10px;
+    margin-top: 1%;
+    color: snow;
+    font-size: 18px;
+}
+
+.authForm input{
+    display: block;
+    margin-left: 10px;
+    padding: 5px;
+    width: 40%;
+    background-color: snow;
+    border-radius: 5px
+}
+
+.authButton{
+    display: block;
+    padding: 5px;
+    width: 34%;
+    margin: 15% 0 0 34%;
+}

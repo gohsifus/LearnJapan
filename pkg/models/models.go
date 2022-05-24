@@ -23,3 +23,10 @@ type User struct{
 	Login    string
 	Password string
 }
+
+//Session Сессии пользователей
+type Session struct{
+	SessionId string
+	UserId int
+	Expires string
+}

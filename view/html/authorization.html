@@ -1,0 +1,13 @@
+{{template "header"}}
+{{template "mainMenu"}}
+<div class="container" style="height: 100%">
+    <div class="authFormContainer">
+        <form id="authForm" class="authForm" action="/authorization/" method="POST">
+            <label>Login:</label>
+            <input type="text" name="login">
+            <label>Password: </label>
+            <input type="password" name="password">
+            <button class="authButton" type="submit">Вход</button>
+        </form>
+    </div>
+</div>

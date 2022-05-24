@@ -8,6 +8,13 @@
         </div>
         <div class="menuItem" style="margin-left: 5%">Статистика</div>
         <div class="menuItem" style="margin-left: 5%">Перевести</div>
-        <div class="menuItem" style="margin-left: 7%">Войти/<a href="/registration/">Зарегистрироваться</a></div>
+        <div class="menuItem" style="margin-left: 7%">
+            {{ if .SessionId}}
+                <a href="/authorization/exit/">Выйти</a>
+            {{ else }}
+                <a href="/authorization/">Войти</a>/
+                <a href="/registration/">Зарегистрироваться</a>
+            {{ end }}
+        </div>
     </div>
 {{end}}
