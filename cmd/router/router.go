@@ -35,7 +35,7 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 		"./view/html/parts/sitePreview.html",
 	}
 
-	data := make(map[string]string)
+	data := make(map[string]interface{})
 
 	if cookieVal, err := r.Cookie("isReg"); err == nil && cookieVal.Value == "true"{
 		data["isReg"] = "true"
@@ -44,6 +44,12 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 	if sessionId, ok := getCurrentSessionId(r); ok{
 		data["SessionId"] = sessionId
 	}
+
+	randCard, err :=  models.GetRandCard()
+	if err != nil{
+		panic(err)
+	}
+	data["RandCard"] = randCard
 
 	template, err := template.ParseFiles(files...)
 	if err != nil{
@@ -73,12 +79,16 @@ func dictionaryIndex(w http.ResponseWriter, r *http.Request){
 		}
 
 		sessionId, _ := r.Cookie("sessionId")
+		cards, err := models.GetCardListBySessionId(sessionId.Value)
+		if err != nil{
+			panic(err)
+		}
 
 		data := struct {
 			Words []models.JpnCards
 			SessionId string
 		}{
-			Words: models.GetCardList(),
+			Words: cards,
 			SessionId: sessionId.Value,
 		}
 
@@ -195,6 +205,7 @@ func addUser(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+//authIndex Страница авторизации
 func authIndex(w http.ResponseWriter, r *http.Request){
 	if r.Method == "POST" { //Авторизация
 		r.ParseForm()
@@ -236,6 +247,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 	templ.Execute(w, nil)
 }
 
+//generateSessionId Вернет случайный набор символов заданной длины
 func generateSessionId(len int) string{
 	charSet := "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
 	var sessionId []byte

@@ -42,6 +42,31 @@ func GetCardList() []JpnCards{
 	return cards
 }
 
+//GetCardListBySessionId Вернет карточки принадлежащие конкретному пользователю по id действуещей сессии
+func GetCardListBySessionId(sessionId string) ([]JpnCards, error){
+	sql := "SELECT cards.* " +
+			"FROM cards " +
+			"LEFT JOIN sessions " +
+			"	ON cards.userId = sessions.userId " +
+			"WHERE sessionId = ? and expires > NOW();"
+
+	rows, err := DB.Query(sql, sessionId)
+	if err != nil{
+		return nil, err
+	}
+	defer rows.Close()
+
+	cards := []JpnCards{}
+
+	for rows.Next(){
+		card := JpnCards{}
+		err = rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
+		cards = append(cards, card)
+	}
+
+	return cards, nil
+}
+
 //Add добавляет карточку
 func (card *JpnCards) Add() (bool, error){
 	sql := "INSERT INTO cards(inJapan, inRussian, mark, dateAdd) VALUES(?, ?, ?, ?)"
@@ -51,4 +76,28 @@ func (card *JpnCards) Add() (bool, error){
 	}
 
 	return true, nil
+}
+
+//GetRandCard Вернет случайную карточку
+func GetRandCard() (JpnCards, error){
+	sql := "SELECT * FROM cards ORDER BY rand() LIMIT 1"
+
+	rows, err := DB.Query(sql)
+	if err != nil{
+		return JpnCards{}, err
+	}
+	defer rows.Close()
+
+	randCard := JpnCards{}
+	if rows.Next(){
+		rows.Scan(
+			&randCard.Id,
+			&randCard.InJapan,
+			&randCard.InRussian,
+			&randCard.Mark,
+			&randCard.DateAdd,
+			&randCard.UserId)
+	}
+
+	return randCard, nil
 }

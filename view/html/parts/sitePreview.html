@@ -2,9 +2,17 @@
     <div id="header" class="header">
         {{template "mainMenu" .}}
 
-        <div id="mainSearch" class="searchElement">
-            Поиск выученного слова
+        <div class="searchElement">
+            <div class="searchWrap">
+                <input id="mainSearch" class="mainSearch" type="text" placeholder="Найти слово...">
+                <div class="searchIcon"><div class="ka" onclick="findWord($('#mainSearch').val())">か</div></div>
+            </div>
         </div>
     </div>
     <script src="/static/js/animateHeader.js"></script>
+    <script>
+        function findWord(inputValue){
+            //TODO Отправка запроса на поиск слова
+        }
+    </script>
 {{end}}

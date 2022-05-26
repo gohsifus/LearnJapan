@@ -4,6 +4,39 @@
     <script>alert("Успешная регистрация!");</script>
     {{end}}
     <div class="container">
-        Container
-        {{.}}
+        <div class="randomCardArea">
+            <div class="titleCard">
+                Случайное слово
+            </div>
+            <div class="randomCard">
+                <div id="randWordArea" class="randWordArea">
+                    <div class="word">{{ .RandCard.InJapan }}</div>
+                    <div id="translatedWord" class="translatedWord"></div>
+                </div>
+                <div class="checkWordForm">
+                    <input id="checkWordInput" class="checkWordInput" type="text" placeholder="Введите перевод слова..." onkeypress="enterWord(event)">
+                    <button id="checkWordButton" class="checkWordButton" onclick="checkWord($('#checkWordInput').val())">Проверить</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+<script>
+    function checkWord(word){
+        if(word.toUpperCase().trim() == ({{ .RandCard.InRussian }}).toUpperCase().trim()) {
+            alert("Верно!")
+            location.reload()
+            $("#checkWordInput").val("")
+        } else {
+            alert("Неверно!")
+            $("#translatedWord").html({{.RandCard.InRussian}})
+            $('#checkWordInput').val({{.RandCard.InRussian}})
+        }
+    }
+
+    function enterWord(event){
+        if(event.keyCode == 13){
+            checkWord($('#checkWordInput').val())
+        }
+    }
+</script>
