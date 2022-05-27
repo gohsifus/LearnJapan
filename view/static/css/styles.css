@@ -254,6 +254,11 @@ html, body{
     background-size: cover;
     border-radius: 0 12px 12px 0;
     font-size: 13px;
+    cursor: pointer;
+}
+
+.searchIcon:hover{
+    box-shadow: 0 0 10px 1px #A2B6B5;
 }
 
 .searchWrap{

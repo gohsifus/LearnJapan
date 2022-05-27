@@ -19,6 +19,7 @@ func init(){
 	http.HandleFunc("/registration/addUser/", addUser)
 	http.HandleFunc("/authorization/", authIndex)
 	http.HandleFunc("/authorization/exit/", destroySession)
+	http.HandleFunc("/dictionary/find/", findCard)
 
 	//Обработка статических файлов
 	fileServer := http.FileServer(http.Dir("./view/static"))
@@ -139,38 +140,49 @@ func addWord(w http.ResponseWriter, r *http.Request){
 	if r.Method == "POST" {
 		r.ParseForm()
 
-		newItem := models.JpnCards{
-			InJapan: r.Form.Get("InJapan"),
-			InRussian: r.Form.Get("InRussian"),
-			Mark: 0,
-			DateAdd: r.Form.Get("DateAdd"),
+		sessionId, err := r.Cookie("sessionId")
+		if err != nil{
+			panic(err)
 		}
-
-		if ok, err := newItem.Add(); err == nil && ok{
-			fmt.Println("Запись добавлена")
-
-			data := make(map[string]interface{})
-			data["status"] = "Ok"
-			data["data"] = newItem
-
-			resp, errJson := json.Marshal(data)
-			if errJson != nil{
-				panic(errJson)
-			}
-			w.Write(resp)
+		userId, ok := models.GetUserIdBySessionId(sessionId.Value)
+		if !ok {
+			fmt.Println("Недействительная сессия или ошибка запроса")
 		} else {
-			fmt.Println("Запись не добавлена: ", err)
 
-			data := make(map[string]interface{})
-			data["status"] = "Err"
-			data["data"] = err
-
-			resp, errJson := json.Marshal(data)
-			if errJson != nil{
-				panic(errJson)
+			newItem := models.JpnCards{
+				InJapan:   r.Form.Get("InJapan"),
+				InRussian: r.Form.Get("InRussian"),
+				Mark:      0,
+				DateAdd:   r.Form.Get("DateAdd"),
+				UserId: userId,
 			}
 
-			w.Write(resp)
+			if ok, err := newItem.Add(); err == nil && ok {
+				fmt.Println("Запись добавлена")
+
+				data := make(map[string]interface{})
+				data["status"] = "Ok"
+				data["data"] = newItem
+
+				resp, errJson := json.Marshal(data)
+				if errJson != nil {
+					panic(errJson)
+				}
+				w.Write(resp)
+			} else {
+				fmt.Println("Запись не добавлена: ", err)
+
+				data := make(map[string]interface{})
+				data["status"] = "Err"
+				data["data"] = err
+
+				resp, errJson := json.Marshal(data)
+				if errJson != nil {
+					panic(errJson)
+				}
+
+				w.Write(resp)
+			}
 		}
 	} else {
 		//TODO 404 сделать страницу
@@ -290,5 +302,40 @@ func destroySession(w http.ResponseWriter, r *http.Request){
 	models.DeleteSession(sessionID.Value)
 	http.Redirect(w, r, "/", 302)
 }
+
+//findCard Найдет карточку
+func findCard(w http.ResponseWriter, r * http.Request){
+	if r.Method == "POST"{
+		r.ParseForm()
+
+		response := make(map[string]interface{})
+
+		if r.PostForm.Get("Action") == "findByInJapan"{
+			card, ok := models.GetCardByInJapan(r.PostForm.Get("InJapan"))
+			if ok {
+				response["status"] = "Ok"
+				response["card"] = card
+
+				json, err := json.Marshal(response)
+				if err != nil{
+					panic(err)
+				}
+
+				w.Write(json)
+			} else {
+				response["status"] = "Bad"
+				response["card"] = "Not found"
+
+				json, err := json.Marshal(response)
+				if err != nil{
+					panic(err)
+				}
+
+				w.Write(json)
+			}
+		}
+	}
+}
+
 
 

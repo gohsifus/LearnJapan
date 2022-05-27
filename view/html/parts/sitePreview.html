@@ -5,14 +5,41 @@
         <div class="searchElement">
             <div class="searchWrap">
                 <input id="mainSearch" class="mainSearch" type="text" placeholder="Найти слово...">
-                <div class="searchIcon"><div class="ka" onclick="findWord($('#mainSearch').val())">か</div></div>
+                <div class="searchIcon" onclick="findWord($('#mainSearch').val())"><div class="ka">か</div></div>
             </div>
         </div>
     </div>
     <script src="/static/js/animateHeader.js"></script>
     <script>
+        window.onload = function() {
+            document.getElementById('mainSearch').value = ''
+        }
+
         function findWord(inputValue){
             //TODO Отправка запроса на поиск слова
+            $.post(
+                "/dictionary/find/",
+                {
+                    InJapan: inputValue,
+                    Action: "findByInJapan"
+                },
+                function(response){
+                    let resp = JSON.parse(response)
+                    console.log(resp)
+
+                    if(resp["status"] == "Bad" && resp["card"] == "Not found") {
+                        alert("Слово не найдено!")
+                    } else {
+                        $("#titleCard").html("Поиск слова")
+                        $("#word").html(resp["card"]["InJapan"])
+                        $("#translatedWord").html(resp["card"]["InRussian"])
+                        $("#checkWordInput").remove()
+                        $("#checkWordButton").remove()
+                        $('html, body').animate({scrollTop: $(document).height() - $(window).height()}, 600);
+                    }
+                }
+            )
+
         }
     </script>
 {{end}}

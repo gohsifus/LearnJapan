@@ -69,8 +69,9 @@ func GetCardListBySessionId(sessionId string) ([]JpnCards, error){
 
 //Add добавляет карточку
 func (card *JpnCards) Add() (bool, error){
-	sql := "INSERT INTO cards(inJapan, inRussian, mark, dateAdd) VALUES(?, ?, ?, ?)"
-	_, err := DB.Exec(sql, card.InJapan, card.InRussian, card.Mark, card.DateAdd)
+	sql := `INSERT INTO cards(inJapan, inRussian, mark, dateAdd, userId) select ?, ?, ?, ?, ? 
+			WHERE NOT EXISTS (SELECT 1 FROM cards WHERE inJapan = ?)`
+	_, err := DB.Exec(sql, card.InJapan, card.InRussian, card.Mark, card.DateAdd, card.UserId, card.InJapan)
 	if err != nil{
 		return false, err
 	}
@@ -100,4 +101,27 @@ func GetRandCard() (JpnCards, error){
 	}
 
 	return randCard, nil
+}
+
+func GetCardByInJapan(inJapan string) (JpnCards, bool){
+	sql := "SELECT * FROM cards WHERE InJapan = ?"
+	rows, err := DB.Query(sql, inJapan)
+	if err != nil {
+		return JpnCards{}, false
+	}
+
+	resultCard := JpnCards{}
+	if rows.Next(){
+		rows.Scan(
+			&resultCard.Id,
+			&resultCard.InJapan,
+			&resultCard.InRussian,
+			&resultCard.Mark,
+			&resultCard.DateAdd,
+			&resultCard.UserId)
+	} else {
+		return JpnCards{}, false
+	}
+
+	return resultCard, true
 }

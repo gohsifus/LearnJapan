@@ -50,3 +50,20 @@ func IsAliveSession(sessionId string) (bool, error){
 
 	return false, nil
 }
+
+func GetUserIdBySessionId(sessionId string) (int, bool){
+	sql := "SELECT userId FROM sessions WHERE sessionId = ? AND expires > NOW();"
+	rows, err := DB.Query(sql, sessionId)
+	if err != nil{
+		return 0, false
+	}
+
+	var ret int
+	if rows.Next() {
+
+		rows.Scan(&ret)
+		return ret, true
+	} else {
+		return 0, false
+	}
+}
