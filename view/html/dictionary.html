@@ -1,10 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Все слова</title>
-</head>
-<body>
-    {{.}}
-</body>
-</html>
+{{template "header" .}}
+    {{template "mainMenu" .}}
+    <div class="container" style="height: 100%;">
+        <div class="dictionaryTabContainer">
+            <table class="dictionaryTabHeaders">
+                <tr>
+                    <th width="33%">На японском</th>
+                    <th width="33%">На русском</th>
+                    <th width="33%">Уровень</th>
+                </tr>
+            </table>
+            <div class="scrollTable">
+                <table id="dictionaryTab" class="dictionaryTab">
+                    {{ range .Words}}
+                        <tr>
+                            <td width="34%">{{ .InJapan }}</td>
+                            <td width="34%">{{ .InRussian }}</td>
+                            <td width="32%">{{ .Mark }}</td>
+                        </tr>
+                    {{end}}
+                </table>
+            </div>
+        </div>
+        <div id="wordCounter" class="wordCounter"><span id="countWords">{{ len .Words }}</span> Слов</div>
+        <div class="addWordContainer">
+            <div class="nihonInput">
+                <input id="nihonWord" placeholder="にほんご...">
+            </div>
+            <div class="translateIcon" title="Перевести"> </div>
+            <div class="russiaInput">
+                <input id="russiaWord" placeholder="Русский...">
+            </div>
+            <button class="addButton" onclick="addWord()">Добавить</button>
+        </div>
+    </div>
+
+<script>
+    function addWord(){
+        var d = new Date()
+        var now = d.getFullYear() + "-" +
+                  ((d.getMonth()+1) < 10 ? "0" + (d.getMonth()+1) : (d.getMonth()+1))  + "-" +
+                  d.getDate()
+
+        $.post(
+            '/dictionary/addWord/',
+            {
+                InJapan: $("#nihonWord").val(),
+                InRussian: $("#russiaWord").val(),
+                Mark: 0,
+                DateAdd: now
+            },
+            function (data){
+                 let response = JSON.parse(data)
+
+                if(response["status"] == "Ok"){
+                    $("#dictionaryTab").append("" +
+                        "<tr>" +
+                            "<td>" + response["data"]["InJapan"] + "</td>" +
+                            "<td>" + response["data"]["InRussian"] + "</td>" +
+                            "<td>" + response["data"]["Mark"] + "</td>" +
+                        "</tr>"
+                    )
+
+                    $("#countWords").text(+$("#countWords").text() + 1)
+
+                    alert("Успешно")
+                    $("#nihonWord").val("")
+                    $("#russiaWord").val("")
+                } else {
+                    alert("Ошибка: " + response["data"])
+                }
+            }
+        )
+    }
+</script>

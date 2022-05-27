@@ -1,0 +1,334 @@
+html, body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.header{
+    width: 100%;
+    height: 100%;
+    background-color: brown;
+    background-image: url("/static/images/2.jpg");
+    background-size: cover;
+}
+
+.footer{
+    width: 100%;
+    height: 10%;
+    background-image: url("/static/images/footerBackGround/tree1.jpg");
+}
+
+.container{
+    widht: 100%;
+    height: 90%;
+    background-image: url("/static/images/rootBackground/bamboo.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 200px;
+}
+
+.mainMenu{
+    width: 100%;
+    height: 10%;
+    background-color: black;
+    position: fixed;
+    top: 0px;
+    z-index: 100;
+
+}
+
+.menuItem{
+    color: aliceblue;
+    font-size: 24px;
+    display: inline-block;
+    margin-top: 1em;
+}
+
+.menuItem a {
+    text-decoration: none;
+}
+
+.menuItem a:visited{
+    color: inherit;
+    text-decoration: none;
+}
+
+/*Таблица словарь*/
+.dictionaryTabContainer{
+    height: 65%;
+    padding-top: 7%;
+    padding-left: 10%;
+    padding-right: 10%;
+    border: 2px solid black;
+    box-shadow: 0px 1px 50px 0px white;
+}
+
+.dictionaryTabHeaders{
+    width: 100%;
+    background-color: grey;
+    box-shadow: inset 0 0 2px;
+}
+
+.dictionaryTabHeaders th{
+    text-align: center;
+    padding: 5px;
+    padding-bottom: 15px;
+}
+
+.scrollTable{
+    overflow-x: auto;
+    height: 82%;
+}
+
+.dictionaryTab{
+    width: 100%;
+    background-color: grey;
+    box-shadow: inset 0 0 2px;
+}
+
+.dictionaryTab td{
+    background-color: LightGrey;
+    padding: 5px;
+}
+
+/*Форма добавления слова*/
+.addWordContainer{
+    padding-top: 2%;
+}
+
+.nihonInput{
+    display: inline-block;
+    margin-left: 10%;
+}
+
+.nihonInput input{
+    padding-top: 5px;
+    padding: 5px;
+    font-family: Times New Roman;
+    font-size: 16px;
+    height: 20px;
+    background-color: snow;
+    border-radius: 4px;
+}
+
+.translateIcon{
+    display: inline-block;
+    width: 30px;
+    min-height: 30px;
+    height: 100%;
+    margin: 0 1% 0 1%;
+    vertical-align: top;
+    background-image: url("/static/images/icons/translateIcon.png");
+    background-size: cover;
+}
+
+.russiaInput{
+    display: inline-block;
+}
+
+.russiaInput input{
+    padding: 5px;
+    font-family: Times New Roman;
+    font-size: 16px;
+    height: 20px;
+    background-color: snow;
+    border-radius: 4px;
+}
+
+.addButton{
+    display: inline-block;
+    background-color: white;
+    width: 10%;
+    min-height: 30px;
+    height: 100%;
+    margin-left: 1%;
+    vertical-align: top;
+}
+
+.wordCounter{
+    color: snow;
+    margin: 1% 0 0 10%;
+    font-size: 18px;
+
+}
+
+/*Форма регистрации*/
+.regFormContainer{
+    position: absolute;
+    width: 36%;
+    height: 35%;
+    background-color: white;
+    margin: 15% 0 0 32%;
+    border-radius: 4px;
+    background-image: url("/static/images/rootBackGround/darkWave.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 10px;
+}
+
+.regForm label{
+    display: block;
+    padding: 5px;
+    padding-left: 10px;
+    margin-top: 1%;
+    color: snow;
+    font-size: 18px;
+}
+
+.regForm input{
+    display: block;
+    margin-left: 10px;
+    padding: 5px;
+    width: 40%;
+    background-color: snow;
+    border-radius: 5px
+}
+
+.regButton{
+    display: block;
+    padding: 5px;
+    width: 34%;
+    margin: 4% 0 0 34%;
+}
+
+/*Форма авторизации*/
+.authFormContainer{
+    position: absolute;
+    width: 36%;
+    height: 35%;
+    background-color: white;
+    margin: 15% 0 0 32%;
+    border-radius: 4px;
+    background-image: url("/static/images/rootBackGround/darkWave.jpg");
+    background-size: cover;
+    box-shadow: inset 0 0 10px;
+}
+
+.authForm label{
+    display: block;
+    padding: 5px;
+    padding-left: 10px;
+    margin-top: 1%;
+    color: snow;
+    font-size: 18px;
+}
+
+.authForm input{
+    display: block;
+    margin-left: 10px;
+    padding: 5px;
+    width: 40%;
+    background-color: snow;
+    border-radius: 5px
+}
+
+.authButton{
+    display: block;
+    padding: 5px;
+    width: 34%;
+    margin: 15% 0 0 34%;
+}
+
+/*MainSearch*/
+.searchElement{
+    width: 50%;
+    height: 15%;
+    background-color: rgba(0, 0, 0, 0.3);
+    margin:20% 0 0 25%;
+    position: absolute;
+    border-radius: 50px;
+
+}
+
+.mainSearch{
+    width: 86%;
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin: 0 0 0 0;
+}
+
+.searchIcon{
+    background-color: #7BA7AB;
+    width: 9%;
+    margin: 0 auto;
+    background-image: url("/static/images/icons/searchIcon3.png");
+    background-size: cover;
+    border-radius: 0 12px 12px 0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.searchIcon:hover{
+    box-shadow: 0 0 10px 1px #A2B6B5;
+}
+
+.searchWrap{
+    width: 88%;
+    padding: 2%;
+    border-radius: 25px;
+    margin: 24px 0 0 4%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+}
+
+.ka{
+    margin: 14% 0 0 35%;
+}
+
+.randomCardArea{
+    background-color: rgba(46, 48, 52, 1);
+    width: 70%;
+    height: 100%;
+    margin: 0 0 0 15%;
+    box-shadow:0px 0px 10px 0px #000;
+    border-radius: 5px;
+}
+
+.randomCard{
+    width: 80%;
+    height: 80%;
+    background-color: rgba(231, 232, 227, 1);
+    margin: 0 0 0 10%;
+    border-radius: 0 10px 10px 10px;
+    position: relative;
+}
+
+.titleCard{
+    margin: 0 10% 0 10%;
+    padding: 10px 10px 10px 30px;
+    font-size: 22px;
+    background-color: #DBD7D2;
+    width: 30%;
+    border-radius: 40px 40px 0 0;
+}
+
+.randWordArea{
+    width: 100%;
+    height: 80%;
+    box-shadow: 0 5px 50px -5px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.checkWordForm{
+    width: 100%;
+    height: 20%;
+}
+
+.word{
+    width: 100%;
+    display: inline-block;
+    margin-top: 180px;
+    font-size: 3em;
+}
+
+.checkWordInput{
+    width: 40%;
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 5px;
+    margin: 30px 0 0 22%;
+    direction: inline-block;
+}
+
+.checkWordButton{
+    padding: 5px;
+}

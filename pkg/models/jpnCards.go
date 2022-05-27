@@ -4,8 +4,9 @@ import(
 	"fmt"
 )
 
-func GetById(id string) JpnCards{
-	rows, err := DB.Query("select * from Cards where id = ?", id)
+//GetCardById Возвращает карточку по id
+func GetCardById(id string) JpnCards{
+	rows, err := DB.Query("select * from Cards where Id = ?", id)
 	if err != nil{
 		panic(fmt.Sprintf("Ошибка выбора даных: %s", err))
 	}
@@ -13,7 +14,7 @@ func GetById(id string) JpnCards{
 
 	card := JpnCards{}
 	if(rows.Next()){
-		rows.Scan(&card.id, &card.inJapan, &card.inRussian, &card.mark, &card.dateAdd)
+		rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 	}
 
 	fmt.Println(id)
@@ -22,7 +23,8 @@ func GetById(id string) JpnCards{
 	return card
 }
 
-func GetList() []JpnCards{
+//GetCardList Возвращает все карточки
+func GetCardList() []JpnCards{
 	rows, err := DB.Query("select * from Cards")
 	if err != nil{
 		panic(fmt.Sprintf("Ошибка выбора даных: %s", err))
@@ -33,11 +35,93 @@ func GetList() []JpnCards{
 
 	for rows.Next(){
 		card := JpnCards{}
-		err = rows.Scan(&card.id, &card.inJapan, &card.inRussian, &card.mark, &card.dateAdd)
+		err = rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 		cards = append(cards, card)
-
-		fmt.Println(card)
 	}
 
 	return cards
+}
+
+//GetCardListBySessionId Вернет карточки принадлежащие конкретному пользователю по id действуещей сессии
+func GetCardListBySessionId(sessionId string) ([]JpnCards, error){
+	sql := "SELECT cards.* " +
+			"FROM cards " +
+			"LEFT JOIN sessions " +
+			"	ON cards.userId = sessions.userId " +
+			"WHERE sessionId = ? and expires > NOW();"
+
+	rows, err := DB.Query(sql, sessionId)
+	if err != nil{
+		return nil, err
+	}
+	defer rows.Close()
+
+	cards := []JpnCards{}
+
+	for rows.Next(){
+		card := JpnCards{}
+		err = rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
+		cards = append(cards, card)
+	}
+
+	return cards, nil
+}
+
+//Add добавляет карточку
+func (card *JpnCards) Add() (bool, error){
+	sql := `INSERT INTO cards(inJapan, inRussian, mark, dateAdd, userId) select ?, ?, ?, ?, ? 
+			WHERE NOT EXISTS (SELECT 1 FROM cards WHERE inJapan = ?)`
+	_, err := DB.Exec(sql, card.InJapan, card.InRussian, card.Mark, card.DateAdd, card.UserId, card.InJapan)
+	if err != nil{
+		return false, err
+	}
+
+	return true, nil
+}
+
+//GetRandCard Вернет случайную карточку
+func GetRandCard() (JpnCards, error){
+	sql := "SELECT * FROM cards ORDER BY rand() LIMIT 1"
+
+	rows, err := DB.Query(sql)
+	if err != nil{
+		return JpnCards{}, err
+	}
+	defer rows.Close()
+
+	randCard := JpnCards{}
+	if rows.Next(){
+		rows.Scan(
+			&randCard.Id,
+			&randCard.InJapan,
+			&randCard.InRussian,
+			&randCard.Mark,
+			&randCard.DateAdd,
+			&randCard.UserId)
+	}
+
+	return randCard, nil
+}
+
+func GetCardByInJapan(inJapan string) (JpnCards, bool){
+	sql := "SELECT * FROM cards WHERE InJapan = ?"
+	rows, err := DB.Query(sql, inJapan)
+	if err != nil {
+		return JpnCards{}, false
+	}
+
+	resultCard := JpnCards{}
+	if rows.Next(){
+		rows.Scan(
+			&resultCard.Id,
+			&resultCard.InJapan,
+			&resultCard.InRussian,
+			&resultCard.Mark,
+			&resultCard.DateAdd,
+			&resultCard.UserId)
+	} else {
+		return JpnCards{}, false
+	}
+
+	return resultCard, true
 }
