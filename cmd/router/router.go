@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -48,13 +49,13 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 
 	randCard, err :=  models.GetRandCard()
 	if err != nil{
-		panic(err)
+		log.Println("Error: RandCard", err)
 	}
 	data["RandCard"] = randCard
 
 	template, err := template.ParseFiles(files...)
 	if err != nil{
-		panic(err)
+		log.Println("Error: templateParse", err)
 	}
 
 	err = template.Execute(w, data)
@@ -76,13 +77,13 @@ func dictionaryIndex(w http.ResponseWriter, r *http.Request){
 
 		template, err := template.ParseFiles(files...)
 		if err != nil {
-			panic(err)
+			log.Println("Error: templateParse", err)
 		}
 
 		sessionId, _ := r.Cookie("sessionId")
 		cards, err := models.GetCardListBySessionId(sessionId.Value)
 		if err != nil{
-			panic(err)
+			log.Println("Error: GetCardList", err)
 		}
 
 		data := struct {
@@ -113,7 +114,7 @@ func getOneCard(w http.ResponseWriter, r *http.Request){
 	word := models.GetCardById(r.URL.Query().Get("id"))
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		panic(err)
+		log.Println("Error: templateParse", err)
 	}
 
 	templ.Execute(w, word)
@@ -129,7 +130,7 @@ func registrationIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		panic(err)
+		log.Println("Error: templateParse", err)
 	}
 
 	templ.Execute(w, nil)
@@ -142,13 +143,13 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 		sessionId, err := r.Cookie("sessionId")
 		if err != nil{
-			panic(err)
+			log.Println(err)
 		}
 		userId, ok := models.GetUserIdBySessionId(sessionId.Value)
 		if !ok {
+			//TODO Перенаправление на авторизацию
 			fmt.Println("Недействительная сессия или ошибка запроса")
 		} else {
-
 			newItem := models.JpnCards{
 				InJapan:   r.Form.Get("InJapan"),
 				InRussian: r.Form.Get("InRussian"),
@@ -158,7 +159,6 @@ func addWord(w http.ResponseWriter, r *http.Request){
 			}
 
 			if ok, err := newItem.Add(); err == nil && ok {
-				fmt.Println("Запись добавлена")
 
 				data := make(map[string]interface{})
 				data["status"] = "Ok"
@@ -166,11 +166,10 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					panic(errJson)
+					log.Println(err)
 				}
 				w.Write(resp)
 			} else {
-				fmt.Println("Запись не добавлена: ", err)
 
 				data := make(map[string]interface{})
 				data["status"] = "Err"
@@ -178,7 +177,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					panic(errJson)
+					log.Println(err)
 				}
 
 				w.Write(resp)
@@ -201,8 +200,6 @@ func addUser(w http.ResponseWriter, r *http.Request){
 		}
 
 		if Ok, err := newUser.Add();  Ok{
-			fmt.Println("Ok")
-
 			//Передаем куку чтобы вывести информацию о регистрации на главной странице
 			expiration := time.Now().Add(2 * time.Second)
 			cookie := http.Cookie{Name: "isReg", Value: "true", Expires: expiration, Path: "/"}
@@ -210,7 +207,7 @@ func addUser(w http.ResponseWriter, r *http.Request){
 
 			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
-			fmt.Println("Error: ", err)
+			log.Println(err)
 		}
 	} else {
 		//TODO 404 сделать страницу
@@ -253,7 +250,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 
 	templ.Execute(w, nil)
@@ -328,7 +325,7 @@ func findCard(w http.ResponseWriter, r * http.Request){
 
 				json, err := json.Marshal(response)
 				if err != nil{
-					panic(err)
+					log.Println(err)
 				}
 
 				w.Write(json)
