@@ -103,6 +103,7 @@ func GetRandCard() (JpnCards, error){
 	return randCard, nil
 }
 
+//GetCardByInJapan Вернет карточку по слову на японском
 func GetCardByInJapan(inJapan string) (JpnCards, bool){
 	sql := "SELECT * FROM cards WHERE InJapan = ?"
 	rows, err := DB.Query(sql, inJapan)

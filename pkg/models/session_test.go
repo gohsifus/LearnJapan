@@ -9,7 +9,7 @@ import (
 func TestSession_Add(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil{
-		panic(err)
+		t.Error("Ошибка создания mock")
 	}
 	defer db.Close()
 
@@ -29,21 +29,21 @@ func TestSession_Add(t *testing.T) {
 		wantErr bool
 	} {
 		{
-			name: "OK if SessionId not exist",
+			name: "OK",
 			args: args{
 				session: Session{
 					SessionId: "qwel",
-					UserId: 13,
+					UserId: 49,
 					Expires: "2022-05-03 12:10:20",
 				},
 			},
 			expectResult: true,
 			mockBehaviour: func(args args, expectResult interface{}){
-
-				rows := sqlmock.NewRows([]string{""}).AddRow(expectResult)
-				mock.ExpectQuery("INSERT INTO sessions").
-					WithArgs(args.session.SessionId, args.session.UserId, args.session.Expires).WillReturnRows(rows)
+				mock.ExpectExec("INSERT INTO sessions").
+					WithArgs(args.session.SessionId, args.session.UserId, args.session.Expires).
+					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
+			wantErr: false,
 		},
 	}
 

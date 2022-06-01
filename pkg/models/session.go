@@ -7,7 +7,7 @@ func (s *Session) Add() (bool, error){
 	sql := "INSERT INTO sessions (sessionId, userId, expires) VALUES(?, ?, ?)"
 	_, err := DB.Exec(sql, s.SessionId, s.UserId, s.Expires)
 	if err != nil{
-		fmt.Println(err)
+		fmt.Println("qwe", err)
 		return false, err
 	}
 
@@ -51,6 +51,7 @@ func IsAliveSession(sessionId string) (bool, error){
 	return false, nil
 }
 
+//GetUserIdBySessionId Вернет id пользователя по id сессии
 func GetUserIdBySessionId(sessionId string) (int, bool){
 	sql := "SELECT userId FROM sessions WHERE sessionId = ? AND expires > NOW();"
 	rows, err := DB.Query(sql, sessionId)

@@ -39,7 +39,7 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 
 	data := make(map[string]interface{})
 
-	if cookieVal, err := r.Cookie("isReg"); err == nil && cookieVal.Value == "true"{
+	if isReg, err := r.Cookie("isReg"); err == nil && isReg.Value == "true"{
 		data["isReg"] = "true"
 	}
 
@@ -61,6 +61,7 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 	err = template.Execute(w, data)
 	if err != nil{
 		panic(err)
+		//TODO Возвращать код ошибкт сервера
 	}
 }
 
