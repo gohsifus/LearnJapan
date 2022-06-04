@@ -15,7 +15,7 @@ import (
 )
 
 func init(){
-	db, err := sql.Open("mysql", "admin:qawsed345rf@/jpnCards?parseTime=true")
+	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(host.docker.internal:3306)/jpncards")
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}
@@ -49,5 +49,5 @@ func main(){
 		os.Exit(0)
 	}()
 
-	http.ListenAndServe("localhost:8080", nil)
+	http.ListenAndServe(":8080", nil)
 }
