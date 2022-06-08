@@ -3,19 +3,18 @@ package main
 import (
 	_ "LearnJapan.com/cmd/router"
 	"LearnJapan.com/pkg/models"
+	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func init(){
-	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(host.docker.internal:3306)/jpncards")
+	db, err := sql.Open("mysql", "admin:qawsed345rf@/jpncards?parseTime=true")
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}

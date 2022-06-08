@@ -2,6 +2,7 @@ package router
 
 import (
 	"LearnJapan.com/pkg/models"
+	"LearnJapan.com/pkg/yandexTranslateApi"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -21,6 +22,7 @@ func init(){
 	http.HandleFunc("/authorization/", authIndex)
 	http.HandleFunc("/authorization/exit/", destroySession)
 	http.HandleFunc("/dictionary/find/", findCard)
+	http.HandleFunc("/dictionary/translate", translate)
 
 	//Обработка статических файлов
 	fileServer := http.FileServer(http.Dir("./view/static"))
@@ -332,6 +334,43 @@ func findCard(w http.ResponseWriter, r * http.Request){
 				w.Write(json)
 			}
 		}
+	}
+}
+
+func translate(w http.ResponseWriter, r *http.Request){
+	if r.Method == "POST"{
+		r.ParseForm()
+
+		response := make(map[string]string)
+
+		var srcStr string
+		if r.PostForm.Get("inJapan") != ""{
+			srcStr = r.PostForm.Get("inJapan")
+		} else {
+			srcStr = r.PostForm.Get("inRussia")
+		}
+
+		translatedString, err := yandexTranslateApi.Translate(
+															srcStr,
+															r.PostForm.Get("srcCode"),
+															r.PostForm.Get("dstCode"))
+		if err != nil{
+			response = map[string]string{
+				"status": "err",
+				"explain": err.Error(),
+			}
+		} else {
+			response = map[string]string{
+				"status": "ok",
+				"translated": translatedString,
+			}
+		}
+
+		jsonResponse, err := json.Marshal(response)
+		if err != nil{
+			panic(err)
+		}
+		w.Write(jsonResponse)
 	}
 }
 
