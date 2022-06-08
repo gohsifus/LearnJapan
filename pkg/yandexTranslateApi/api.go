@@ -6,18 +6,67 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
-const (
-	token = "Bearer  t1.9euelZrNj5ieyZfPzJiNk4-Sj5WQnO3rnpWaxovGjJ3GzJTKyovGnpKKkszl9Pc6R31q-e9GagfY3fT3enV6avnvRmoH2A.xbMm64cJkpML_OzOGa6P7MKmQo3FAGqGYvMKG3owP5T20nGWQ-l-l7rB7-TW6lZKOd5EISO-lwF51J_MV7eHAw"
-	folderId = "b1gfhitl9di88phga4fk"
-	globalUrl = "https://translate.api.cloud.yandex.net/"
-)
+type yApiConf struct{
+	folderId string `json:"folder_id"`
+	globalUrl string `json:"global_url"`
+	oAuthToken string `json:"o_auth_token"`
+	iamToken string `json:"iam_token"`
+}
+
+func (y *yApiConf) convertFromMap(m map[string]string){
+	y.folderId = m["folder_id"]
+	y.globalUrl = m["global_url"]
+	y.oAuthToken = m["o_auth_token"]
+	y.iamToken = m["iam_token"]
+}
+
+var apiConf yApiConf
+
+func init(){
+	data := make(map[string]string)
+
+	configs, err := ioutil.ReadFile("./pkg/yandexTranslateApi/configs.json")
+	if err != nil{
+		log.Printf("Ошибка инициализации yandexApi: %s\n", err.Error())
+	}
+
+	errMarshal := json.Unmarshal(configs, &data)
+	if errMarshal != nil{
+		log.Printf("Ошибка инициализации yandexApi: %s\n", errMarshal.Error())
+	}
+
+	apiConf.convertFromMap(data)
+	updateIamToken()
+}
+
+func updateIamToken(){
+	client := http.Client{}
+
+	data := map[string]string{
+		"yandexPassportOauthToken": apiConf.oAuthToken,
+	}
+	body, err := json.Marshal(data)
+	if err != nil{
+		log.Println("Ошибка обновления iam токена")
+	}
+
+	request, err := http.NewRequest("POST", "https://iam.api.cloud.yandex.net/iam/v1/tokens", bytes.NewBuffer(body))
+	response, _ := client.Do(request)
+
+	reqBytes, _ := ioutil.ReadAll(response.Body)
+	iamToken := make(map[string]string)
+	json.Unmarshal(reqBytes, &iamToken)
+	apiConf.iamToken = iamToken["iamToken"]
+	fmt.Println(data)
+}
 
 //callApiMethod Отправляет запрос с параметрами на конкретный endpoint
 func callApiMethod(params map[string]interface{}, method string, url string) (*http.Response, error){
-	url = globalUrl + url
+	url = apiConf.globalUrl + url
 	client := http.Client{}
 	if method == "POST"{
 		jsonParams, err := json.Marshal(params)
@@ -29,7 +78,7 @@ func callApiMethod(params map[string]interface{}, method string, url string) (*h
 		if err != nil{
 			return &http.Response{}, errors.New("Ошибка создания запроса")
 		}
-		req.Header.Set("Authorization", token)
+		req.Header.Set("Authorization", "Bearer " + apiConf.iamToken)
 
 		response, err := client.Do(req)
 		if err != nil{
@@ -57,7 +106,7 @@ func GetLanguageList() ([]Language, error){
 	url := "translate/v2/languages"
 
 	params := map[string]interface{}{
-		"folderId": folderId,
+		"folderId": apiConf.folderId,
 	}
 	response, err := callApiMethod(params, "POST", url)
 	if err != nil{
@@ -77,7 +126,7 @@ func GetLanguageList() ([]Language, error){
 func Translate(str, srcLang, dstLang string) (string, error){
 	url := "translate/v2/translate"
 	params := map[string]interface{}{
-		"folderId": folderId,
+		"folderId": apiConf.folderId,
 		"sourceLanguageCode": srcLang,
 		"targetLanguageCode": dstLang,
 		"texts": []string{str},
