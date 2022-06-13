@@ -1,0 +1,19 @@
+name: Go
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  
+  deploy: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Connecting host"
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USER_NAME }}
+          key: ${{ secrets.HOST_SSH }}
+          script: |
+            ls
