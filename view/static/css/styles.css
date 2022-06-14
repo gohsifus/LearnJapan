@@ -119,6 +119,7 @@ html, body{
     vertical-align: top;
     background-image: url("/static/images/icons/translateIcon.png");
     background-size: cover;
+    cursor: pointer;
 }
 
 .russiaInput{

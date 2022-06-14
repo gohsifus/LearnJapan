@@ -26,7 +26,7 @@
             <div class="nihonInput">
                 <input id="nihonWord" placeholder="にほんご...">
             </div>
-            <div class="translateIcon" title="Перевести"> </div>
+            <div class="translateIcon" title="Перевести" onclick="translate()"> </div>
             <div class="russiaInput">
                 <input id="russiaWord" placeholder="Русский...">
             </div>
@@ -68,6 +68,46 @@
                     $("#russiaWord").val("")
                 } else {
                     alert("Ошибка: " + response["data"])
+                }
+            }
+        )
+    }
+
+    function translate(){
+        let nihonInput = $("#nihonWord").val()
+        let russiaWord = $("#russiaWord").val()
+        let srcCode = ""
+        let dstCode = ""
+
+        if(nihonInput == "" && russiaWord != ""){ //Если пустой nihon
+            srcCode = "ru"
+            dstCode = "ja"
+        } else if(nihonInput != "" && russiaWord == ""){ //Если пустой russia
+            srcCode = "ja"
+            dstCode = "ru"
+        } else { //Оба пустые
+            alert("Для перевода должно быть заполнено одно поле(на одном из языков).")
+            return
+        }
+
+        $.post(
+            "/dictionary/translate",
+            {
+                inRussia: russiaWord,
+                inJapan: nihonInput,
+                srcCode: srcCode,
+                dstCode: dstCode,
+            },
+            function(response){
+                resp = JSON.parse(response)
+                if(resp["status"] == "ok"){
+                    if(srcCode == "ru"){
+                        $("#nihonWord").val(resp["translated"])
+                    } else {
+                        $("#russiaWord").val(resp["translated"])
+                    }
+                } else {
+                    alert("Ошибка: " + resp["explain"])
                 }
             }
         )
