@@ -18,7 +18,14 @@ func init(){
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}
-
+	
+	dbStatus := db.Ping()
+	if dbStatus != nil{
+		fmt.Println(dbStatus)
+	} else {
+		fmt.Println("db connected")
+	}
+	
 	models.DB = db
 
 	fileLog, err := os.OpenFile("./logs/log.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
