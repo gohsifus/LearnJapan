@@ -10,6 +10,9 @@ jobs:
     steps:
       - name: "Checkout master"
         uses: actions/checkout@v2
+        
+      - name: "aboba"
+        run: ls
       
       - name: "Build image"
         run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest .
