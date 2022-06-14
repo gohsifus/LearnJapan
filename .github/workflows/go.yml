@@ -23,7 +23,6 @@ jobs:
       - name: "Push in remote repo"
         run: docker push ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}
     
-  
   deploy: 
     runs-on: ubuntu-latest
     needs: build_and_push
@@ -35,4 +34,9 @@ jobs:
           username: ${{ secrets.HOST_USER_NAME }}
           key: ${{ secrets.HOST_SSH }}
           script: |
-            ls
+            docker pull ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
+            docker stop ${{ secrets.CONTAINER_NAME }}
+            docker rm ${{ secrets.CONTAINER_NAME }}
+            docker run --restart always --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
+            ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
+            docker ps
