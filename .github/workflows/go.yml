@@ -36,8 +36,8 @@ jobs:
           script: |
             docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
-            docker stop ${{ secrets.CONTAINER_NAME }}
-            docker rm ${{ secrets.CONTAINER_NAME }}
-            docker run --restart always --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
-            ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
-            docker ps -a
+            # docker stop ${{ secrets.CONTAINER_NAME }}
+            # docker rm ${{ secrets.CONTAINER_NAME }}
+            # docker run --restart always --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
+            # ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
+            # docker ps -a
