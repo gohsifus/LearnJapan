@@ -3,4 +3,4 @@ RUN mkdir /LearnJapan
 ADD . /LearnJapan
 WORKDIR /LearnJapan
 RUN go build -o main ./cmd
-CMD ["./main"]
+CMD ["/LearnJapan/main"]
