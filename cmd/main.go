@@ -56,5 +56,5 @@ func main(){
 		os.Exit(0)
 	}()
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe("0.0.0.0:8080", nil)
 }
