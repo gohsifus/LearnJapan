@@ -21,7 +21,8 @@ func init(){
 	
 	dbStatus := db.Ping()
 	if dbStatus != nil{
-		fmt.Println("err" + dbStatus)
+		fmt.Println("err: ")
+		fmt.Println(dbStatus)
 	} else {
 		fmt.Println("db connected")
 	}
