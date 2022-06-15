@@ -204,7 +204,7 @@ func addUser(w http.ResponseWriter, r *http.Request){
 
 		if Ok, err := newUser.Add();  Ok{
 			//Передаем куку чтобы вывести информацию о регистрации на главной странице
-			expiration := time.Now().Add(2 * time.Second)
+			expiration := models.Now().Add(2 * time.Second)
 			cookie := http.Cookie{Name: "isReg", Value: "true", Expires: expiration, Path: "/"}
 			http.SetCookie(w, &cookie)
 
@@ -224,7 +224,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 
 		user, ok := models.FindUserByLoginAndPassword(r.PostForm.Get("login"), r.PostForm.Get("password"))
 		if ok{
-			expires := time.Now().Add(1 * time.Hour)
+			expires := models.Now().Add(1 * time.Hour)
 			newSession := models.Session{
 				SessionId: generateSessionId(14),
 				UserId: user.Id,

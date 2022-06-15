@@ -1,13 +1,16 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 //Add Добавит сессию
 func (s *Session) Add() (bool, error){
 	sql := "INSERT INTO sessions (sessionId, userId, expires) VALUES(?, ?, ?)"
 	_, err := DB.Exec(sql, s.SessionId, s.UserId, s.Expires)
 	if err != nil{
-		fmt.Println("qwe", err)
+		fmt.Println(err)
 		return false, err
 	}
 
@@ -67,4 +70,22 @@ func GetUserIdBySessionId(sessionId string) (int, bool){
 	} else {
 		return 0, false
 	}
+}
+
+//Now Вернет текущее время и дату на сервере с бд
+func Now() time.Time{
+	sql := "SELECT NOW()"
+
+	rows, err := DB.Query(sql)
+	if err != nil{
+		fmt.Println(err)
+		return time.Time{}
+	}
+
+	var ret time.Time
+	if rows.Next(){
+		rows.Scan(&ret)
+	}
+
+	return ret
 }
