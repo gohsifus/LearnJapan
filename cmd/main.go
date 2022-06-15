@@ -14,7 +14,7 @@ import (
 )
 
 func init(){
-	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(host.docker.internal:3306)/jpncards")
+	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(185.189.167.212:3306)/jpncards")
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}
