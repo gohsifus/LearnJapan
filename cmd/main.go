@@ -31,7 +31,7 @@ func init(){
 
 	fileLog, err := os.OpenFile("./logs/log.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 	if err != nil {
-		//panic(err)
+		panic(err)
 	}
 
 	log.SetOutput(fileLog)
