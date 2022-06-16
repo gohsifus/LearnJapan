@@ -78,7 +78,6 @@ func Now() time.Time{
 
 	rows, err := DB.Query(sql)
 	if err != nil{
-		fmt.Println(err)
 		return time.Time{}
 	}
 
