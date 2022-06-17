@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "LearnJapan.com/cmd/router"
+	"LearnJapan.com/pkg/configs"
+	_ "LearnJapan.com/pkg/configs"
 	"LearnJapan.com/pkg/models"
 	"database/sql"
 	"fmt"
@@ -14,10 +16,7 @@ import (
 )
 
 func init(){
-	val, ok := os.LookupEnv("DB_CONNECTION_STRING")
-	fmt.Println(val, ok)
-
-	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(185.189.167.212:3306)/jpncards?parseTime=true")
+	db, err := sql.Open("mysql", configs.Cfg.DBConnectionString)
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}
