@@ -14,6 +14,9 @@ import (
 )
 
 func init(){
+	val, ok := os.LookupEnv("DB_CONNECTION_STRING")
+	fmt.Println(val, ok)
+
 	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(185.189.167.212:3306)/jpncards?parseTime=true")
 	if err != nil{
 		panic("Ошибка подключения к базе")
