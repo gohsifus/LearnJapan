@@ -1,6 +1,8 @@
 package yandexTranslateApi
 
 import (
+	"LearnJapan.com/pkg/configs"
+	_ "LearnJapan.com/pkg/configs"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -27,17 +29,21 @@ func (y *yApiConf) convertFromMap(m map[string]string){
 var apiConf yApiConf
 
 func init(){
-	data := make(map[string]string)
+	data := map[string]string{
+		"folder_id": configs.Cfg.YandexApiFolderId,
+		"global_url": configs.Cfg.YandexApiUrl,
+		"o_auth_token": configs.Cfg.YandexApiToken,
+	}
 
-	configs, err := ioutil.ReadFile("./pkg/yandexTranslateApi/configs.json")
+	/*configs, err := ioutil.ReadFile("./pkg/yandexTranslateApi/configs.json")
 	if err != nil{
 		log.Printf("Ошибка инициализации yandexApi: %s\n", err.Error())
-	}
+	}*/
 
-	errMarshal := json.Unmarshal(configs, &data)
+	/*errMarshal := json.Unmarshal(configs, &data)
 	if errMarshal != nil{
 		log.Printf("Ошибка инициализации yandexApi: %s\n", errMarshal.Error())
-	}
+	}*/
 
 	apiConf.convertFromMap(data)
 	updateIamToken()
