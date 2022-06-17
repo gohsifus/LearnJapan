@@ -224,6 +224,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 
 		user, ok := models.FindUserByLoginAndPassword(r.PostForm.Get("login"), r.PostForm.Get("password"))
 		if ok{
+			fmt.Println(models.Now())
 			expires := models.Now().Add(1 * time.Hour)
 			newSession := models.Session{
 				SessionId: generateSessionId(14),

@@ -14,11 +14,19 @@ import (
 )
 
 func init(){
-	db, err := sql.Open("mysql", "admin:qawsed345rf@/jpncards?parseTime=true")
+	db, err := sql.Open("mysql", "admin:qawsed345rf@tcp(185.189.167.212:3306)/jpncards?parseTime=true")
 	if err != nil{
 		panic("Ошибка подключения к базе")
 	}
-
+	
+	dbStatus := db.Ping()
+	if dbStatus != nil{
+		fmt.Println("err: ")
+		fmt.Println(dbStatus)
+	} else {
+		fmt.Println("db connected")
+	}
+	
 	models.DB = db
 
 	fileLog, err := os.OpenFile("./logs/log.txt", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
@@ -48,5 +56,5 @@ func main(){
 		os.Exit(0)
 	}()
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe("0.0.0.0:8080", nil)
 }
