@@ -5,4 +5,4 @@ WORKDIR /LearnJapan
 RUN mkdir /logs
 RUN touch /logs/log.txt
 RUN go build -o main ./cmd
-CMD ["main"]
+CMD ["/LearnJapan/main"]
