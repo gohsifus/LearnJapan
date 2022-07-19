@@ -4,5 +4,5 @@ ADD . /LearnJapan
 WORKDIR /LearnJapan
 RUN mkdir ./logs
 RUN touch ./logs/log.txt
-RUN go build -o main ./cmd
+RUN GOOS=linux GOARCH=arm64 go build -o main ./cmd
 CMD ["/LearnJapan/main"]
