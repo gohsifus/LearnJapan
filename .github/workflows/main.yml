@@ -11,8 +11,8 @@ jobs:
       - name: "Checkout master"
         uses: actions/checkout@v2
         
-      - name: "aboba"
-        run: ls
+      - name: "check env"
+        run: go env
       
       - name: "Build image"
         run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest .
@@ -49,5 +49,5 @@ jobs:
             -e YANDEX_API_FOLDER_ID \
             -e YANDEX_API_URL \
             -e DB_CONNECTION_STRING \
-            --platform linux/amd64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
+            --platform linux/arm64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
             ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
