@@ -15,7 +15,7 @@ jobs:
         run: ls
       
       - name: "Build image"
-        run: docker build --platform linux/arm64/v8 -t ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest .
+        run: docker build -t ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest .
         
       - name: "Login in docker"
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -49,5 +49,5 @@ jobs:
             -e YANDEX_API_FOLDER_ID \
             -e YANDEX_API_URL \
             -e DB_CONNECTION_STRING \
-            -d --platform linux/amd64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
+            --platform linux/amd64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
             ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
