@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.16-alpine
 RUN apk add --update bash && rm -rf /var/cache/apk/*
 RUN mkdir /LearnJapan
 ADD . /LearnJapan
