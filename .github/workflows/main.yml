@@ -49,5 +49,5 @@ jobs:
             -e YANDEX_API_FOLDER_ID \
             -e YANDEX_API_URL \
             -e DB_CONNECTION_STRING \
-            -d --restart always --platform linux/amd64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }}\
+            -d --restart always --platform linux/amd64 --publish 8080:8080 --name ${{ secrets.CONTAINER_NAME }} \
             ${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_REPO }}:latest
