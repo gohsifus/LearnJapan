@@ -1,5 +1,5 @@
 FROM golang:1.16-alpine
-RUN apk add --no-cache bash
+RUN apk update && apk add bash
 RUN mkdir /LearnJapan
 ADD . /LearnJapan
 WORKDIR /LearnJapan
