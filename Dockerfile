@@ -1,4 +1,5 @@
 FROM golang:latest
+RUN apk add --update bash && rm -rf /var/cache/apk/*
 RUN mkdir /LearnJapan
 ADD . /LearnJapan
 WORKDIR /LearnJapan
