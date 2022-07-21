@@ -1,7 +1,7 @@
 package configs
 
 import (
-	"log"
+	"LearnJapan.com/pkg/logger"
 	"os"
 )
 
@@ -14,7 +14,8 @@ func init(){
 	dbConnString, ok := os.LookupEnv("DB_CONNECTION_STRING")
 
 	if !ok{
-		log.Fatalln("Error: Переменные окружения не инициализированны")
+		logger.Print("FatalError: Переменные окружения не инициализированны")
+		os.Exit(1)
 	}
 
 	Cfg = Configs{
