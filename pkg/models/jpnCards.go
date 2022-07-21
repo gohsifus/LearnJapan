@@ -17,9 +17,6 @@ func GetCardById(id string) JpnCards{
 		rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 	}
 
-	fmt.Println(id)
-	fmt.Println(card)
-
 	return card
 }
 

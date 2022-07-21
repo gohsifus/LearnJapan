@@ -1,12 +1,12 @@
 package router
 
 import (
+	"LearnJapan.com/pkg/logger"
 	"LearnJapan.com/pkg/models"
 	"LearnJapan.com/pkg/yandexTranslateApi"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -51,19 +51,19 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 
 	randCard, err :=  models.GetRandCard()
 	if err != nil{
-		log.Println("Error: RandCard", err)
+		logger.Print("Error: RandCard" + err.Error())
 	}
 	data["RandCard"] = randCard
 
 	template, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse" + err.Error())
 	}
 
 	err = template.Execute(w, data)
 	if err != nil{
 		panic(err)
-		//TODO Возвращать код ошибкт сервера
+		//TODO Возвращать код ошибки сервера
 	}
 }
 
@@ -80,13 +80,13 @@ func dictionaryIndex(w http.ResponseWriter, r *http.Request){
 
 		template, err := template.ParseFiles(files...)
 		if err != nil {
-			log.Println("Error: templateParse", err)
+			logger.Print("Error: templateParse " + err.Error())
 		}
 
 		sessionId, _ := r.Cookie("sessionId")
 		cards, err := models.GetCardListBySessionId(sessionId.Value)
 		if err != nil{
-			log.Println("Error: GetCardList", err)
+			logger.Print("Error: GetCardList " + err.Error())
 		}
 
 		data := struct {
@@ -117,7 +117,7 @@ func getOneCard(w http.ResponseWriter, r *http.Request){
 	word := models.GetCardById(r.URL.Query().Get("id"))
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse " + err.Error())
 	}
 
 	templ.Execute(w, word)
@@ -133,7 +133,7 @@ func registrationIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse " + err.Error())
 	}
 
 	templ.Execute(w, nil)
@@ -146,7 +146,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 		sessionId, err := r.Cookie("sessionId")
 		if err != nil{
-			log.Println(err)
+			logger.Print(err.Error())
 		}
 		userId, ok := models.GetUserIdBySessionId(sessionId.Value)
 		if !ok {
@@ -169,7 +169,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 				w.Write(resp)
 			} else {
@@ -180,7 +180,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 
 				w.Write(resp)
@@ -210,7 +210,7 @@ func addUser(w http.ResponseWriter, r *http.Request){
 
 			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
-			log.Println(err)
+			logger.Print(err.Error())
 		}
 	} else {
 		//TODO 404 сделать страницу
@@ -254,7 +254,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err)
+		logger.Print(err.Error())
 	}
 
 	templ.Execute(w, nil)
@@ -329,7 +329,7 @@ func findCard(w http.ResponseWriter, r * http.Request){
 
 				json, err := json.Marshal(response)
 				if err != nil{
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 
 				w.Write(json)
@@ -369,7 +369,7 @@ func translate(w http.ResponseWriter, r *http.Request){
 
 		jsonResponse, err := json.Marshal(response)
 		if err != nil{
-			panic(err)
+			logger.Print("Translate Error " + err.Error())
 		}
 		w.Write(jsonResponse)
 	}

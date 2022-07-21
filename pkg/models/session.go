@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"LearnJapan.com/pkg/logger"
 	"time"
 )
 
@@ -10,7 +10,7 @@ func (s *Session) Add() (bool, error){
 	sql := "INSERT INTO sessions (sessionId, userId, expires) VALUES(?, ?, ?)"
 	_, err := DB.Exec(sql, s.SessionId, s.UserId, s.Expires)
 	if err != nil{
-		fmt.Println(err)
+		logger.Print(err.Error())
 		return false, err
 	}
 
@@ -64,7 +64,6 @@ func GetUserIdBySessionId(sessionId string) (int, bool){
 
 	var ret int
 	if rows.Next() {
-
 		rows.Scan(&ret)
 		return ret, true
 	} else {
