@@ -9,14 +9,17 @@ import (
 	"html/template"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func init(){
 	http.HandleFunc("/", mainIndex)
+	http.HandleFunc("/testing/", testingIndex)
 	http.HandleFunc("/dictionary/", dictionaryIndex)
 	http.HandleFunc("/dictionary/oneWord/", getOneCard)
 	http.HandleFunc("/dictionary/addWord/", addWord)
+	http.HandleFunc("/dictionary/changeMark/", changeMark)
 	http.HandleFunc("/registration/", registrationIndex)
 	http.HandleFunc("/registration/addUser/", addUser)
 	http.HandleFunc("/authorization/", authIndex)
@@ -64,6 +67,44 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 	if err != nil{
 		panic(err)
 		//TODO Возвращать код ошибки сервера
+	}
+}
+
+//testingIndex Страница с тестами
+func testingIndex(w http.ResponseWriter, r *http.Request){
+	if checkAccess(r){
+		files := []string{
+			"./view/html/testing.html",
+			"./view/html/parts/header.html",
+			"./view/html/parts/mainMenu.html",
+		}
+
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			logger.Print("Error: templateParse " + err.Error())
+		}
+
+		sessionId, _ := r.Cookie("sessionId")
+		randCard, err := models.GetRandCardForUser(sessionId.Value)
+		if err != nil {
+			logger.Print(err.Error())
+		}
+
+
+		data := struct{
+			RandCard models.JpnCards
+			SessionId string
+		}{
+			RandCard: randCard,
+			SessionId: sessionId.Value,
+		}
+
+		err = template.Execute(w, data)
+		if err != nil{
+			panic(err)
+		}
+	} else {
+		http.Redirect(w, r, "/authorization/", 302)
 	}
 }
 
@@ -338,6 +379,7 @@ func findCard(w http.ResponseWriter, r * http.Request){
 	}
 }
 
+//translate Переведет слово с помощью api
 func translate(w http.ResponseWriter, r *http.Request){
 	if r.Method == "POST"{
 		r.ParseForm()
@@ -375,5 +417,27 @@ func translate(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+//changeMark
+func changeMark(w http.ResponseWriter, r *http.Request){
+	if r.Method == "POST"{
+		r.ParseForm()
 
+		if ok, _ := models.IsAliveSession(r.PostForm.Get("sessionId")); ok {
+			cardId, err := strconv.Atoi(r.PostForm.Get("cardId"))
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			value, err := strconv.Atoi(r.PostForm.Get("value"))
+			if err != nil{
+				fmt.Println(err)
+			}
+
+			err = models.UpdateCardMark(cardId, value)
+			if err != nil{
+				fmt.Println(err)
+			}
+		}
+	}
+}
 
