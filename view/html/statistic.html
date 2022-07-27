@@ -1,0 +1,122 @@
+{{ template "header" . }}
+{{ template "mainMenu" . }}
+<div class="container" style="height: 100%">
+    <div class="dashBoardArea">
+        <div class="upperDash">
+            <div class="wordsInformation">
+                <div class="allWordsInfo">Выучено слов: {{ .AllWords }}</div>
+                <div class="badWordsInfo">
+                    <div style="width: 20%; display: inline-block">{{ .BadWords }}</div>
+                    <div style="display: inline-block">- Слова требующие внимания</div>
+                </div>
+                <div class="newWordsInfo">
+                    <div style="width: 20%; display: inline-block"> {{ .NewWords }} </div>
+                    <div style="display: inline-block">- Новые слова</div>
+                </div>
+                <div class="avgWordsInfo">
+                    <div style="width: 20%; display: inline-block"> {{ .AvgWords }} </div>
+                    <div style="display: inline-block">- Слова в процессе закрепления</div>
+                </div>
+                <div class="goodWordsInfo">
+                    <div style="width: 20%; display: inline-block"> {{ .GoodWords }} </div>
+                    <div style="display: inline-block">- Хорошо выученные слова</div>
+                </div>
+            </div>
+            <div class="dashBoardNotice">
+                *Для закрепления слов используйте раздел <a href="/testing/">"Тест"</a>
+            </div>
+            <div id="circleDiag" class="circleDiag"></div>
+            <div class="profileDash">
+                <div>Login:</div>
+                <div>Password: </div>
+                <div>Level: </div>
+            </div>
+        </div>
+        <div class="bottomDash">
+            <div class="levelGraph">
+                <div class="userLevel">
+                    <div id="userLevel">
+                        <div class="levelMarker"></div>
+                    </div>
+                </div>
+                <div class="n5Level">
+                    <div id="n5Level"></div>
+                </div>
+                <div class="n4Level">
+                    <div id="n4Level"></div>
+                </div>
+                <div class="n3Level">
+                    <div id="n3Level"></div>
+                </div>
+                <div class="n2Level">
+                    <div id="n2Level"></div>
+                </div>
+                <div class="n1Level">
+                    <div id="n1Level"></div>
+                </div>
+                <div class="legendRight">
+                    <div>11000</div>
+                    <div>10000</div>
+                    <div>9000</div>
+                    <div>8000</div>
+                    <div>7000</div>
+                    <div>6000</div>
+                    <div>5000</div>
+                    <div>4000</div>
+                    <div>3000</div>
+                    <div>2000</div>
+                    <div>1000</div>
+                </div>
+                <div class="legentBottom">
+                    <div>Ваш уровень</div>
+                    <div style="margin-left: 1%">N5</div>
+                    <div>N4</div>
+                    <div>N3</div>
+                    <div>N2</div>
+                    <div>N1</div>
+                    <div class="dashBoardNoticeBottom">
+                        *Примерное необходимое количество слов для каждого уровня JLPT
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var part = 360 / {{ .AllWords }} //Одна часть из 360
+
+    var bad = part * {{ .BadWords }}
+    var avg = bad + part * {{ .AvgWords }}
+    var good = avg + part * {{ .GoodWords }}
+
+    //Диаграмма
+    $("#circleDiag").css("background-image", "conic-gradient(\n" +
+        "            red " + bad + "deg,\n" +
+        "            yellow 0 " + avg + "deg,\n" +
+        "            green 0 " + good + "deg,\n" +
+        "            lightGrey 0\n" +
+        "    )")
+
+    //График
+    //11k - 100% usr - x x = (usr * 100)/11r
+    var userHeight = ({{ .AllWords }} * 100)/11000
+    $("#userLevel").css("height", userHeight + "%")
+
+    var n5Height = (800 * 100)/11000
+    $("#n5Level").css("height", n5Height + "%")
+
+    var n4Height = (1600 * 100)/11000
+    $("#n4Level").css("height", n4Height + "%")
+
+    var n3Height = (3600 * 100)/11000
+    $("#n3Level").css("height", n3Height + "%")
+
+    var n2Height = (6000 * 100)/11000
+    $("#n2Level").css("height", n2Height + "%")
+
+    var n1Height = (10000 * 100)/11000
+    $("#n1Level").css("height", n1Height + "%")
+
+</script>
+

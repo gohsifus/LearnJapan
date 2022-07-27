@@ -15,7 +15,15 @@
                         <tr>
                             <td width="34%">{{ .InJapan }}</td>
                             <td width="34%">{{ .InRussian }}</td>
+                            {{ if lt .Mark 0}}
+                            <td width="32%" style="background-color: red">{{ .Mark }}</td>
+                            {{ else if eq .Mark 0 }}
                             <td width="32%">{{ .Mark }}</td>
+                            {{ else if and (gt .Mark 0) (lt .Mark 30)}}
+                            <td width="32%" style="background-color: yellow">{{ .Mark }}</td>
+                            {{ else if gt .Mark 30}}
+                            <td width="32%" style="background-color: green">{{ .Mark }}</td>
+                            {{ end }}
                         </tr>
                     {{end}}
                 </table>
