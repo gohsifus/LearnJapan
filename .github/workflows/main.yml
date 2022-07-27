@@ -49,6 +49,5 @@ jobs:
             -e YANDEX_API_FOLDER_ID \
             -e YANDEX_API_URL \
             -e DB_CONNECTION_STRING \
-            -d --publish 8080:8080 -v /root/logs:/LearnJapan/logs \
-            --name ${{secrets.CONTAINER_NAME}} \
+            -d --publish 8080:8080 -v /root/logs/:/LearnJapan/logs/ --name ${{secrets.CONTAINER_NAME}} \
             ${{secrets.DOCKER_USER}}/${{secrets.DOCKER_REPO}}:latest
