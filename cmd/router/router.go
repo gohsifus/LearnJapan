@@ -26,6 +26,7 @@ func init(){
 	http.HandleFunc("/authorization/exit/", destroySession)
 	http.HandleFunc("/dictionary/find/", findCard)
 	http.HandleFunc("/dictionary/translate", translate)
+	http.HandleFunc("/statistic/", statisticIndex)
 
 	//Обработка статических файлов
 	fileServer := http.FileServer(http.Dir("./view/static"))
@@ -438,6 +439,59 @@ func changeMark(w http.ResponseWriter, r *http.Request){
 				fmt.Println(err)
 			}
 		}
+	}
+}
+
+//statisticIndex Страница с статистикой
+func statisticIndex(w http.ResponseWriter, r *http.Request){
+	if checkAccess(r) {
+		files := []string{
+			"./view/html/statistic.html",
+			"./view/html/parts/header.html",
+			"./view/html/parts/mainMenu.html",
+		}
+
+		data := struct{
+			BadWords int
+			NewWords int
+			AvgWords int
+			GoodWords int
+			SessionId string
+			AllWords int
+		}{}
+
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			logger.Print("Error: templateParse " + err.Error())
+		}
+
+		sessionId, _ := r.Cookie("sessionId")
+		cards, err := models.GetCardListBySessionId(sessionId.Value)
+		if err != nil{
+			logger.Print("Error: GetCardList " + err.Error())
+		}
+
+		for _, v := range cards{
+			if v.Mark < 0{
+				data.BadWords += 1
+			} else if v.Mark == 0{
+				data.NewWords += 1
+			} else if v.Mark > 0 && v.Mark < 30{
+				data.AvgWords += 1
+			} else if v.Mark > 30{
+				data.GoodWords += 1
+			}
+		}
+
+		data.AllWords = len(cards)
+		data.SessionId = sessionId.Value
+
+		err = template.Execute(w, data)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		http.Redirect(w, r, "/authorization/", 302)
 	}
 }
 
