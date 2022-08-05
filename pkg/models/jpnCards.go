@@ -111,6 +111,7 @@ func GetRandCardForUser(sessionId string) (JpnCards, error) {
 
 
 	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
 	if err != nil{
 		return JpnCards{}, err
 	}
@@ -131,6 +132,7 @@ func GetRandCardForUser(sessionId string) (JpnCards, error) {
 func GetCardByInJapan(inJapan string) (JpnCards, bool){
 	sql := "SELECT * FROM cards WHERE InJapan = ?"
 	rows, err := DB.Query(sql, inJapan)
+	defer rows.Close()
 	if err != nil {
 		return JpnCards{}, false
 	}
