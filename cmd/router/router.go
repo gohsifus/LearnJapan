@@ -320,7 +320,7 @@ func checkAccess(r *http.Request) bool{
 	if cookieVal, err := r.Cookie("sessionId"); err == nil{
 		if ok, errAlive := models.IsAliveSession(cookieVal.Value); ok && errAlive == nil{
 			return true
-		} else {
+		} else if errAlive != nil {
 			logger.Print("Ошибка проверки сессии " + errAlive.Error())
 			return false
 		}
