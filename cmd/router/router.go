@@ -318,11 +318,14 @@ func generateSessionId(len int) string{
 //checkAccess Проверит есть ли доступ к странице
 func checkAccess(r *http.Request) bool{
 	if cookieVal, err := r.Cookie("sessionId"); err == nil{
-		if ok, _ := models.IsAliveSession(cookieVal.Value); ok {
+		if ok, errAlive := models.IsAliveSession(cookieVal.Value); ok && errAlive == nil{
 			return true
 		} else {
+			logger.Print("Ошибка проверки сессии " + errAlive.Error())
 			return false
 		}
+	} else if err != nil{
+		logger.Print("Ошибка авторизации " + err.Error())
 	}
 
 	return false

@@ -38,6 +38,7 @@ func IsAliveSession(sessionId string) (bool, error){
 	sql := "SELECT COUNT(sessionId) FROM sessions WHERE sessionId = ? AND expires > NOW();"
 
 	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
 	if err != nil{
 		return false, err
 	}
@@ -58,6 +59,7 @@ func IsAliveSession(sessionId string) (bool, error){
 func GetUserIdBySessionId(sessionId string) (int, bool){
 	sql := "SELECT userId FROM sessions WHERE sessionId = ? AND expires > NOW();"
 	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
 	if err != nil{
 		return 0, false
 	}
@@ -76,6 +78,7 @@ func Now() time.Time{
 	sql := "SELECT NOW()"
 
 	rows, err := DB.Query(sql)
+	defer rows.Close()
 	if err != nil{
 		return time.Time{}
 	}
