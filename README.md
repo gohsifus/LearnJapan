@@ -1,6 +1,6 @@
 Web-приложение для изучения японского языка.
 
-#Запуск
+# Запуск
 NatsStreaming в docker контейнере
 ```
 make runNatsStreaming
