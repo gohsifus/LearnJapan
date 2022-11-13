@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "test"
-        run: echo "ok"
+        run: go vet $(go list ./... | grep -v /vendor/)
 
   build_and_push:
     runs-on: ubuntu-latest
