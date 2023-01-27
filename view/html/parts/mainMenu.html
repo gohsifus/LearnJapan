@@ -7,14 +7,14 @@
             <a href="/dictionary/">Словарь</a>
         </div>
         <div class="menuItem" style="margin-left: 5%">
-            <a href="/statistic/">Статистика</a>
+            <a href="/dictionary/statistic">Статистика</a>
         </div>
         <div class="menuItem" style="margin-left: 5%">
-            <a href="/testing/">Тест</a>
+            <a href="/testing">Тест</a>
         </div>
         <div class="menuItem" style="margin-left: 7%">
             {{ if .SessionId}}
-                <a href="/authorization/exit/">Выйти</a>
+                <a href="/authorization/logout">Выйти</a>
             {{ else }}
                 <a href="/authorization/">Войти</a>/
                 <a href="/registration/">Зарегистрироваться</a>
