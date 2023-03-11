@@ -7,9 +7,12 @@ import (
 	"LearnJapan.com/internal/delivery/middlewares"
 	v1 "LearnJapan.com/internal/delivery/router/v1"
 	"LearnJapan.com/pkg/logger"
-	"LearnJapan.com/pkg/mysql"
+	m "LearnJapan.com/pkg/mysql"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"log"
 	"net/http"
 	"os"
@@ -25,9 +28,23 @@ func main() {
 
 	logs := logger.NewLogger(cfg)
 
-	db, err := mysql.NewDBMySql(cfg, logs)
+	db, err := m.NewDBMySql(cfg, logs)
 	if err != nil {
-		log.Fatal(err)
+		logs.Fatal(err)
+	}
+
+	driver, err := mysql.WithInstance(db.Db, &mysql.Config{})
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance("file://migrations", "mysql", driver)
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	if err := migrator.Up(); err != nil {
+		logs.Fatal(err)
 	}
 
 	ch := make(chan os.Signal, 1)
