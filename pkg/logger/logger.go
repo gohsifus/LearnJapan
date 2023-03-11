@@ -44,3 +44,7 @@ func (l Logger) Fatal(message interface{}) {
 		l.stdLogger.Fatal().Msg(constants.MESSAGE_UNKNOWN_LOG_TYPE)
 	}
 }
+
+func (l Logger) Warn(message string) {
+	l.stdLogger.Warn().Msg(message)
+}

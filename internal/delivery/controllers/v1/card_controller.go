@@ -70,7 +70,11 @@ func (u CardController) GetOneCard(c *gin.Context) {
 		"./view/html/parts/footer.html",
 	}
 
-	word := u.cardRepo.GetCardById(c.Request.URL.Query().Get("id"))
+	word, err := u.cardRepo.GetCardById(c.Query("id"))
+	if err != nil {
+		u.logger.Error(err)
+	}
+
 	templ, err := template.ParseFiles(files...)
 	if err != nil {
 		u.logger.Error(err)
@@ -124,8 +128,8 @@ func (u CardController) AddWord(c *gin.Context) {
 	sessionData, _ := c.Get("sessionId")
 	sessionId, _ := sessionData.(string)
 
-	userId, ok := u.sessionRepo.GetUserIdBySessionId(sessionId)
-	if !ok {
+	userId, err := u.sessionRepo.GetUserIdBySessionId(sessionId)
+	if err != nil || userId == 0 {
 		u.logger.Error("user not exists")
 		return
 	}
@@ -138,18 +142,7 @@ func (u CardController) AddWord(c *gin.Context) {
 		UserId:    userId,
 	}
 
-	if ok, err := u.cardRepo.Add(&newItem); err == nil && ok {
-		data := make(map[string]interface{})
-		data["status"] = "Ok"
-		data["data"] = newItem
-
-		resp, errJson := json.Marshal(data)
-		if errJson != nil {
-			u.logger.Error(errJson)
-		}
-
-		c.Writer.Write(resp)
-	} else {
+	if err := u.cardRepo.Add(&newItem); err != nil {
 		data := make(map[string]interface{})
 		data["status"] = "Err"
 		data["data"] = err
@@ -161,6 +154,17 @@ func (u CardController) AddWord(c *gin.Context) {
 
 		c.Writer.Write(resp)
 	}
+
+	data := make(map[string]interface{})
+	data["status"] = "Ok"
+	data["data"] = newItem
+
+	resp, errJson := json.Marshal(data)
+	if errJson != nil {
+		u.logger.Error(errJson)
+	}
+
+	c.Writer.Write(resp)
 }
 
 // FindCard найдет карточку
@@ -170,8 +174,13 @@ func (u CardController) FindCard(c *gin.Context) {
 	response := make(map[string]interface{})
 
 	if c.Request.PostForm.Get("Action") == "findByInJapan" {
-		card, ok := u.cardRepo.GetCardByInJapan(c.Request.PostForm.Get("InJapan"))
-		if ok {
+		card, err := u.cardRepo.GetCardByInJapan(c.Request.PostForm.Get("InJapan"))
+		if err != nil {
+			u.logger.Error(err)
+			return
+		}
+
+		if card.Id > 0 {
 			response["status"] = "Ok"
 			response["card"] = card
 
@@ -181,17 +190,19 @@ func (u CardController) FindCard(c *gin.Context) {
 			}
 
 			c.Writer.Write(json)
-		} else {
-			response["status"] = "Bad"
-			response["card"] = "Not found"
-
-			json, err := json.Marshal(response)
-			if err != nil {
-				u.logger.Error(err)
-			}
-
-			c.Writer.Write(json)
+			return
 		}
+
+		response["status"] = "Bad"
+		response["card"] = "Not found"
+
+		json, err := json.Marshal(response)
+		if err != nil {
+			u.logger.Error(err)
+			return
+		}
+
+		c.Writer.Write(json)
 	}
 }
 
@@ -209,12 +220,14 @@ func (u CardController) ChangeMark(c *gin.Context) {
 		u.logger.Error(err)
 	}
 
-	if err := u.cardRepo.UpdateCardMark(cardId, value); err != nil {
+	_, err = u.cardRepo.UpdateCardMark(cardId, value)
+	if err != nil {
 		u.logger.Error(err)
+		return
 	}
 }
 
-// StatisticIndex страница с статистикой по выученным словам
+// StatisticIndex страница со статистикой по выученным словам
 func (u CardController) StatisticIndex(c *gin.Context) {
 	sessionData, _ := c.Get("sessionId")
 	sessionId, _ := sessionData.(string)

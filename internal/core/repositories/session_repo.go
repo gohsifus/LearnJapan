@@ -2,15 +2,16 @@ package repositories
 
 import (
 	"LearnJapan.com/internal/entity/models"
-	"database/sql"
+	"LearnJapan.com/pkg/postgres"
+	"github.com/Masterminds/squirrel"
 	"time"
 )
 
 type SessionRepo struct {
-	DB *sql.DB
+	DB postgres.DB
 }
 
-func NewSessionRepo(db *sql.DB) *SessionRepo {
+func NewSessionRepo(db postgres.DB) *SessionRepo {
 	return &SessionRepo{
 		DB: db,
 	}
@@ -18,25 +19,31 @@ func NewSessionRepo(db *sql.DB) *SessionRepo {
 
 // Add добавит сессию
 func (r SessionRepo) Add(session *models.Session) error {
-	sql := "INSERT INTO sessions (sessionId, userId, expires) VALUES(?, ?, ?)"
+	query, args, err := squirrel.
+		Insert("production.sessions").
+		Columns("id", "user_id", "expires").
+		Values(session.Id, session.UserId, session.Expires).
+		ToSql()
 
-	_, err := r.DB.Exec(sql, session.SessionId, session.UserId, session.Expires)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return r.DB.Raw(query, args...).Scan(&session).Error
 }
 
 // DeleteSession удаляет сессию
 func (r SessionRepo) DeleteSession(sessionId string) error {
-	sql := "DELETE FROM sessions WHERE sessionId = ?"
-	_, err := r.DB.Exec(sql, sessionId)
+	query, args, err := squirrel.
+		Delete("production.sessions").
+		Where(squirrel.Eq{"id": sessionId}).
+		ToSql()
+
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return r.DB.Raw(query, args...).Error
 }
 
 // UpdateSessionExpires обновит время жизни сессии
@@ -45,60 +52,47 @@ func (r SessionRepo) UpdateSessionExpires(sessionId, newExpires string) (bool, e
 }
 
 // IsAliveSession проверит, действует ли сессия
-func (r SessionRepo) IsAliveSession(sessionId string) (bool, error) {
-	sql := "SELECT COUNT(sessionId) FROM sessions WHERE sessionId = ? AND expires > NOW();"
+func (r SessionRepo) IsAliveSession(sessionId string) (result bool, err error) {
+	query, args, err := squirrel.Select("1").
+		From("production.sessions").
+		Where(squirrel.Eq{"id": sessionId}).
+		Prefix("select exists(").
+		Suffix(")").
+		ToSql()
 
-	rows, err := r.DB.Query(sql, sessionId)
-	defer rows.Close()
 	if err != nil {
-		return false, err
+		return result, err
 	}
 
-	var exist int
-	if rows.Next() {
-		rows.Scan(&exist)
-	}
-
-	if exist == 1 {
-		return true, nil
-	}
-
-	return false, nil
+	return result, r.DB.Raw(query, args...).Scan(&result).Error
 }
 
 // GetUserIdBySessionId вернет id пользователя по id сессии
-func (r SessionRepo) GetUserIdBySessionId(sessionId string) (int, bool) {
-	sql := "SELECT userId FROM sessions WHERE sessionId = ? AND expires > NOW();"
-	rows, err := r.DB.Query(sql, sessionId)
-	defer rows.Close()
+func (r SessionRepo) GetUserIdBySessionId(sessionId string) (result int, err error) {
+	query, args, err := squirrel.
+		Select("user_id").
+		From("production.sessions").
+		Where(squirrel.Eq{"id": sessionId}).
+		Where("expires > NOW()").
+		ToSql()
+
 	if err != nil {
-		return 0, false
+		return result, err
 	}
 
-	var ret int
-	if rows.Next() {
-		rows.Scan(&ret)
-		return ret, true
-	} else {
-		return 0, false
-	}
+	return result, r.DB.Raw(query, args...).Scan(&result).Error
 }
 
 // Now вернет текущее время и дату на сервере с бд
-func (r SessionRepo) Now() (time.Time, error) {
-	sql := "SELECT NOW()"
-
-	rows, err := r.DB.Query(sql)
-	defer rows.Close()
+func (r SessionRepo) Now() (result time.Time, err error) {
+	query, args, err := squirrel.
+		Select("NOW()").
+		From("production.sessions").
+		ToSql()
 
 	if err != nil {
-		return time.Time{}, err
+		return result, err
 	}
 
-	var ret time.Time
-	if rows.Next() {
-		rows.Scan(&ret)
-	}
-
-	return ret, nil
+	return result, r.DB.Raw(query, args...).Scan(&result).Error
 }

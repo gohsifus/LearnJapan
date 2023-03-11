@@ -2,3 +2,4 @@ configs.txt
 /logs
 configs.json
 .env
+.idea

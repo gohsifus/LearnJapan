@@ -9,6 +9,7 @@ import (
 type Configs struct {
 	Yandex
 	MYSQL
+	PG
 }
 
 type Yandex struct {
@@ -23,6 +24,14 @@ type MYSQL struct {
 	Password string `envconfig:"MYSQL_PASSWORD"`
 	Host     string `envconfig:"MYSQL_HOST"`
 	Port     string `envconfig:"MYSQL_PORT"`
+}
+
+type PG struct {
+	DB       string `envconfig:"PG_DATABASE"`
+	User     string `envconfig:"PG_USER"`
+	Password string `envconfig:"PG_PASSWORD"`
+	Host     string `envconfig:"PG_HOST"`
+	Port     string `envconfig:"PG_PORT"`
 }
 
 func NewConfigs() (*Configs, error) {

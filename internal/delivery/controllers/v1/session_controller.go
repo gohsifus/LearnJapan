@@ -4,7 +4,6 @@ import (
 	"LearnJapan.com/internal/core/repositories"
 	"LearnJapan.com/internal/entity/models"
 	"LearnJapan.com/pkg/logger"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"math/rand"
@@ -28,30 +27,34 @@ func NewSessionController(r *repositories.SessionRepo, u *repositories.UserRepo,
 }
 
 func (u SessionController) Login(c *gin.Context) {
-	user, ok := u.userRepo.FindUserByLoginAndPassword(c.PostForm("login"), c.PostForm("password"))
-	if ok {
+	user, err := u.userRepo.FindUserByLoginAndPassword(c.PostForm("login"), c.PostForm("password"))
+	if err != nil {
+		u.logger.Error(err)
+		return
+	}
+
+	if user.Id > 0 {
 		expires, err := u.repo.Now()
 		if err != nil {
 			u.logger.Error(err)
+			return
 		}
 
 		expires = expires.Add(1 * time.Hour)
 
 		newSession := models.Session{
-			SessionId: u.GenerateSessionId(14),
-			UserId:    user.Id,
-			Expires:   expires.Format("2006-01-02 15:04:05"),
+			Id:      u.GenerateSessionId(14),
+			UserId:  user.Id,
+			Expires: expires,
 		}
 
 		if err := u.repo.Add(&newSession); err != nil {
 			u.logger.Error(err)
 		}
 
-		fmt.Println(expires)
-
 		cookie := http.Cookie{
 			Name:    "sessionId",
-			Value:   newSession.SessionId,
+			Value:   newSession.Id,
 			Expires: expires,
 			Path:    "/",
 		}

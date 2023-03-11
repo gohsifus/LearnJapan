@@ -7,9 +7,11 @@ import (
 	"LearnJapan.com/internal/delivery/middlewares"
 	v1 "LearnJapan.com/internal/delivery/router/v1"
 	"LearnJapan.com/pkg/logger"
-	"LearnJapan.com/pkg/mysql"
+	pg "LearnJapan.com/pkg/postgres"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"log"
 	"net/http"
 	"os"
@@ -25,9 +27,28 @@ func main() {
 
 	logs := logger.NewLogger(cfg)
 
-	db, err := mysql.NewDBMySql(cfg, logs)
+	db, err := pg.NewDBPostgres(cfg, logs)
 	if err != nil {
-		log.Fatal(err)
+		logs.Fatal(err)
+	}
+
+	dbInstance, err := db.DB.DB()
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	driver, err := postgres.WithInstance(dbInstance, &postgres.Config{})
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance("file://migrations/pg", "postgres", driver)
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	if err = migrator.Up(); err != nil && err != migrate.ErrNoChange {
+		logs.Fatal(err)
 	}
 
 	ch := make(chan os.Signal, 1)
@@ -39,16 +60,16 @@ func main() {
 		signal.Stop(ch)
 		logs.Info("Application is stopped")
 
-		db.Db.Close()
+		dbInstance.Close()
 
 		os.Exit(0)
 	}()
 
-	sessionRepo := repositories.NewSessionRepo(db.Db)
+	sessionRepo := repositories.NewSessionRepo(db)
 	authMiddleware := middlewares.NewAuthMiddleware(sessionRepo)
 
 	mux := gin.New()
-	controller := controllers.NewMainController(db.Db, logs)
+	controller := controllers.NewMainController(db, logs)
 	router := v1.NewRouter(mux, controller, authMiddleware)
 	router.Setup()
 
