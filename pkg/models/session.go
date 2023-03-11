@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"LearnJapan.com/pkg/logger"
 	"time"
 )
 
@@ -10,7 +10,7 @@ func (s *Session) Add() (bool, error){
 	sql := "INSERT INTO sessions (sessionId, userId, expires) VALUES(?, ?, ?)"
 	_, err := DB.Exec(sql, s.SessionId, s.UserId, s.Expires)
 	if err != nil{
-		fmt.Println(err)
+		logger.Print(err.Error())
 		return false, err
 	}
 
@@ -38,6 +38,7 @@ func IsAliveSession(sessionId string) (bool, error){
 	sql := "SELECT COUNT(sessionId) FROM sessions WHERE sessionId = ? AND expires > NOW();"
 
 	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
 	if err != nil{
 		return false, err
 	}
@@ -58,13 +59,13 @@ func IsAliveSession(sessionId string) (bool, error){
 func GetUserIdBySessionId(sessionId string) (int, bool){
 	sql := "SELECT userId FROM sessions WHERE sessionId = ? AND expires > NOW();"
 	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
 	if err != nil{
 		return 0, false
 	}
 
 	var ret int
 	if rows.Next() {
-
 		rows.Scan(&ret)
 		return ret, true
 	} else {
@@ -77,6 +78,7 @@ func Now() time.Time{
 	sql := "SELECT NOW()"
 
 	rows, err := DB.Query(sql)
+	defer rows.Close()
 	if err != nil{
 		return time.Time{}
 	}

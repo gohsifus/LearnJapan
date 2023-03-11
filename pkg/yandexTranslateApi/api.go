@@ -35,16 +35,6 @@ func init(){
 		"o_auth_token": configs.Cfg.YandexApiToken,
 	}
 
-	/*configs, err := ioutil.ReadFile("./pkg/yandexTranslateApi/configs.json")
-	if err != nil{
-		log.Printf("Ошибка инициализации yandexApi: %s\n", err.Error())
-	}*/
-
-	/*errMarshal := json.Unmarshal(configs, &data)
-	if errMarshal != nil{
-		log.Printf("Ошибка инициализации yandexApi: %s\n", errMarshal.Error())
-	}*/
-
 	apiConf.convertFromMap(data)
 	updateIamToken()
 }
@@ -67,7 +57,6 @@ func updateIamToken(){
 	iamToken := make(map[string]string)
 	json.Unmarshal(reqBytes, &iamToken)
 	apiConf.iamToken = iamToken["iamToken"]
-	fmt.Println(data)
 }
 
 //callApiMethod Отправляет запрос с параметрами на конкретный endpoint

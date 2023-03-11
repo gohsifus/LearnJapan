@@ -1,6 +1,6 @@
 package models
 
-import(
+import (
 	"fmt"
 )
 
@@ -16,9 +16,6 @@ func GetCardById(id string) JpnCards{
 	if(rows.Next()){
 		rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
 	}
-
-	fmt.Println(id)
-	fmt.Println(card)
 
 	return card
 }
@@ -103,10 +100,39 @@ func GetRandCard() (JpnCards, error){
 	return randCard, nil
 }
 
+//GetRandCardForUser Вернет случайную карточку пользователя
+func GetRandCardForUser(sessionId string) (JpnCards, error) {
+	sql := "SELECT cards.* " +
+		   "FROM cards " +
+		   "LEFT JOIN sessions " +
+		   "	ON cards.userId = sessions.userId " +
+		   "WHERE sessions.sessionId = ? AND expires > NOW()" +
+		   "ORDER BY rand() LIMIT 1"
+
+
+	rows, err := DB.Query(sql, sessionId)
+	defer rows.Close()
+	if err != nil{
+		return JpnCards{}, err
+	}
+
+	card := JpnCards{}
+
+	if rows.Next() {
+		err = rows.Scan(&card.Id, &card.InJapan, &card.InRussian, &card.Mark, &card.DateAdd, &card.UserId)
+		if err != nil{
+			return JpnCards{}, err
+		}
+	}
+
+	return card, nil
+}
+
 //GetCardByInJapan Вернет карточку по слову на японском
 func GetCardByInJapan(inJapan string) (JpnCards, bool){
 	sql := "SELECT * FROM cards WHERE InJapan = ?"
 	rows, err := DB.Query(sql, inJapan)
+	defer rows.Close()
 	if err != nil {
 		return JpnCards{}, false
 	}
@@ -125,4 +151,14 @@ func GetCardByInJapan(inJapan string) (JpnCards, bool){
 	}
 
 	return resultCard, true
+}
+
+//UpdateCardMark Изменит значение оценки слова на mark
+func UpdateCardMark(id, mark int) error{
+	sql := "UPDATE cards SET mark = mark + ? WHERE id = ?"
+	_, err := DB.Exec(sql, mark, id)
+	if err != nil{
+		return err
+	}
+	return nil
 }

@@ -1,28 +1,32 @@
 package router
 
 import (
+	"LearnJapan.com/pkg/logger"
 	"LearnJapan.com/pkg/models"
 	"LearnJapan.com/pkg/yandexTranslateApi"
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func init(){
 	http.HandleFunc("/", mainIndex)
+	http.HandleFunc("/testing/", testingIndex)
 	http.HandleFunc("/dictionary/", dictionaryIndex)
 	http.HandleFunc("/dictionary/oneWord/", getOneCard)
 	http.HandleFunc("/dictionary/addWord/", addWord)
+	http.HandleFunc("/dictionary/changeMark/", changeMark)
 	http.HandleFunc("/registration/", registrationIndex)
 	http.HandleFunc("/registration/addUser/", addUser)
 	http.HandleFunc("/authorization/", authIndex)
 	http.HandleFunc("/authorization/exit/", destroySession)
 	http.HandleFunc("/dictionary/find/", findCard)
 	http.HandleFunc("/dictionary/translate", translate)
+	http.HandleFunc("/statistic/", statisticIndex)
 
 	//Обработка статических файлов
 	fileServer := http.FileServer(http.Dir("./view/static"))
@@ -51,19 +55,57 @@ func mainIndex(w http.ResponseWriter, r *http.Request){
 
 	randCard, err :=  models.GetRandCard()
 	if err != nil{
-		log.Println("Error: RandCard", err)
+		logger.Print("Error: RandCard" + err.Error())
 	}
 	data["RandCard"] = randCard
 
 	template, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse" + err.Error())
 	}
 
 	err = template.Execute(w, data)
 	if err != nil{
 		panic(err)
-		//TODO Возвращать код ошибкт сервера
+		//TODO Возвращать код ошибки сервера
+	}
+}
+
+//testingIndex Страница с тестами
+func testingIndex(w http.ResponseWriter, r *http.Request){
+	if checkAccess(r){
+		files := []string{
+			"./view/html/testing.html",
+			"./view/html/parts/header.html",
+			"./view/html/parts/mainMenu.html",
+		}
+
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			logger.Print("Error: templateParse " + err.Error())
+		}
+
+		sessionId, _ := r.Cookie("sessionId")
+		randCard, err := models.GetRandCardForUser(sessionId.Value)
+		if err != nil {
+			logger.Print(err.Error())
+		}
+
+
+		data := struct{
+			RandCard models.JpnCards
+			SessionId string
+		}{
+			RandCard: randCard,
+			SessionId: sessionId.Value,
+		}
+
+		err = template.Execute(w, data)
+		if err != nil{
+			panic(err)
+		}
+	} else {
+		http.Redirect(w, r, "/authorization/", 302)
 	}
 }
 
@@ -80,13 +122,13 @@ func dictionaryIndex(w http.ResponseWriter, r *http.Request){
 
 		template, err := template.ParseFiles(files...)
 		if err != nil {
-			log.Println("Error: templateParse", err)
+			logger.Print("Error: templateParse " + err.Error())
 		}
 
 		sessionId, _ := r.Cookie("sessionId")
 		cards, err := models.GetCardListBySessionId(sessionId.Value)
 		if err != nil{
-			log.Println("Error: GetCardList", err)
+			logger.Print("Error: GetCardList " + err.Error())
 		}
 
 		data := struct {
@@ -117,7 +159,7 @@ func getOneCard(w http.ResponseWriter, r *http.Request){
 	word := models.GetCardById(r.URL.Query().Get("id"))
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse " + err.Error())
 	}
 
 	templ.Execute(w, word)
@@ -133,7 +175,7 @@ func registrationIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil{
-		log.Println("Error: templateParse", err)
+		logger.Print("Error: templateParse " + err.Error())
 	}
 
 	templ.Execute(w, nil)
@@ -146,7 +188,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 		sessionId, err := r.Cookie("sessionId")
 		if err != nil{
-			log.Println(err)
+			logger.Print(err.Error())
 		}
 		userId, ok := models.GetUserIdBySessionId(sessionId.Value)
 		if !ok {
@@ -169,7 +211,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 				w.Write(resp)
 			} else {
@@ -180,7 +222,7 @@ func addWord(w http.ResponseWriter, r *http.Request){
 
 				resp, errJson := json.Marshal(data)
 				if errJson != nil {
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 
 				w.Write(resp)
@@ -210,7 +252,7 @@ func addUser(w http.ResponseWriter, r *http.Request){
 
 			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
-			log.Println(err)
+			logger.Print(err.Error())
 		}
 	} else {
 		//TODO 404 сделать страницу
@@ -254,7 +296,7 @@ func authIndex(w http.ResponseWriter, r *http.Request){
 
 	templ, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err)
+		logger.Print(err.Error())
 	}
 
 	templ.Execute(w, nil)
@@ -276,11 +318,14 @@ func generateSessionId(len int) string{
 //checkAccess Проверит есть ли доступ к странице
 func checkAccess(r *http.Request) bool{
 	if cookieVal, err := r.Cookie("sessionId"); err == nil{
-		if ok, _ := models.IsAliveSession(cookieVal.Value); ok {
+		if ok, errAlive := models.IsAliveSession(cookieVal.Value); ok && errAlive == nil{
 			return true
-		} else {
+		} else if errAlive != nil {
+			logger.Print("Ошибка проверки сессии " + errAlive.Error())
 			return false
 		}
+	} else if err != nil{
+		logger.Print("Ошибка авторизации " + err.Error())
 	}
 
 	return false
@@ -329,7 +374,7 @@ func findCard(w http.ResponseWriter, r * http.Request){
 
 				json, err := json.Marshal(response)
 				if err != nil{
-					log.Println(err)
+					logger.Print(err.Error())
 				}
 
 				w.Write(json)
@@ -338,6 +383,7 @@ func findCard(w http.ResponseWriter, r * http.Request){
 	}
 }
 
+//translate Переведет слово с помощью api
 func translate(w http.ResponseWriter, r *http.Request){
 	if r.Method == "POST"{
 		r.ParseForm()
@@ -369,11 +415,86 @@ func translate(w http.ResponseWriter, r *http.Request){
 
 		jsonResponse, err := json.Marshal(response)
 		if err != nil{
-			panic(err)
+			logger.Print("Translate Error " + err.Error())
 		}
 		w.Write(jsonResponse)
 	}
 }
 
+//changeMark
+func changeMark(w http.ResponseWriter, r *http.Request){
+	if r.Method == "POST"{
+		r.ParseForm()
 
+		if ok, _ := models.IsAliveSession(r.PostForm.Get("sessionId")); ok {
+			cardId, err := strconv.Atoi(r.PostForm.Get("cardId"))
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			value, err := strconv.Atoi(r.PostForm.Get("value"))
+			if err != nil{
+				fmt.Println(err)
+			}
+
+			err = models.UpdateCardMark(cardId, value)
+			if err != nil{
+				fmt.Println(err)
+			}
+		}
+	}
+}
+
+//statisticIndex Страница с статистикой
+func statisticIndex(w http.ResponseWriter, r *http.Request){
+	if checkAccess(r) {
+		files := []string{
+			"./view/html/statistic.html",
+			"./view/html/parts/header.html",
+			"./view/html/parts/mainMenu.html",
+		}
+
+		data := struct{
+			BadWords int
+			NewWords int
+			AvgWords int
+			GoodWords int
+			SessionId string
+			AllWords int
+		}{}
+
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			logger.Print("Error: templateParse " + err.Error())
+		}
+
+		sessionId, _ := r.Cookie("sessionId")
+		cards, err := models.GetCardListBySessionId(sessionId.Value)
+		if err != nil{
+			logger.Print("Error: GetCardList " + err.Error())
+		}
+
+		for _, v := range cards{
+			if v.Mark < 0{
+				data.BadWords += 1
+			} else if v.Mark == 0{
+				data.NewWords += 1
+			} else if v.Mark > 0 && v.Mark < 30{
+				data.AvgWords += 1
+			} else if v.Mark > 30{
+				data.GoodWords += 1
+			}
+		}
+
+		data.AllWords = len(cards)
+		data.SessionId = sessionId.Value
+
+		err = template.Execute(w, data)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		http.Redirect(w, r, "/authorization/", 302)
+	}
+}
 

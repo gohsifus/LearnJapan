@@ -14,6 +14,7 @@ func (user *User) Add() (bool, error){
 func FindUserByLoginAndPassword(login, password  string) (User, bool){
 	sql := "SELECT id, login, email FROM users WHERE login = ? AND password = ?"
 	rows, err := DB.Query(sql, login, password)
+	defer rows.Close()
 	if err != nil{
 		panic(err)
 	}
