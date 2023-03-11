@@ -4,7 +4,7 @@ import (
 	"LearnJapan.com/internal/core/repositories"
 	v1 "LearnJapan.com/internal/delivery/controllers/v1"
 	"LearnJapan.com/pkg/logger"
-	"database/sql"
+	"LearnJapan.com/pkg/postgres"
 	"github.com/gin-gonic/gin"
 	"html/template"
 )
@@ -16,7 +16,7 @@ type MainController struct {
 	logger   *logger.Logger
 }
 
-func NewMainController(db *sql.DB, logger *logger.Logger) *MainController {
+func NewMainController(db postgres.DB, logger *logger.Logger) *MainController {
 	cardRepo := repositories.NewCardRepo(db)
 	sessionRepo := repositories.NewSessionRepo(db)
 	userRepo := repositories.NewUserRepo(db)

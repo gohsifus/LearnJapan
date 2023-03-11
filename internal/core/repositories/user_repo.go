@@ -2,14 +2,15 @@ package repositories
 
 import (
 	"LearnJapan.com/internal/entity/models"
-	"database/sql"
+	"LearnJapan.com/pkg/postgres"
+	"github.com/Masterminds/squirrel"
 )
 
 type UserRepo struct {
-	DB *sql.DB
+	postgres.DB
 }
 
-func NewUserRepo(db *sql.DB) *UserRepo {
+func NewUserRepo(db postgres.DB) *UserRepo {
 	return &UserRepo{
 		DB: db,
 	}
@@ -17,28 +18,32 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 
 // Add добавит пользователя в базу
 func (r UserRepo) Add(user *models.User) error {
-	sql := "INSERT INTO users (login, password, email) VALUES(?, ?, ?)"
-	if _, err := r.DB.Exec(sql, user.Login, user.Password, user.Email); err != nil {
+	query, args, err := squirrel.
+		Insert("production.users").
+		Columns("login", "password", "email").
+		Values(user.Login, user.Password, user.Email).
+		Suffix("RETURNING *").
+		ToSql()
+
+	if err != nil {
 		return err
 	}
 
-	return nil
+	return r.DB.Raw(query, args...).Scan(&user).Error
 }
 
 // FindUserByLoginAndPassword вернет пользователя если существует в базе
-func (r UserRepo) FindUserByLoginAndPassword(login, password string) (models.User, bool) {
-	sql := "SELECT id, login, email FROM users WHERE login = ? AND password = ?"
-	rows, err := r.DB.Query(sql, login, password)
-	defer rows.Close()
+func (r UserRepo) FindUserByLoginAndPassword(login, password string) (result models.User, err error) {
+	query, args, err := squirrel.
+		Select("*").
+		From("production.users").
+		Where(squirrel.Eq{"login": login}).
+		Where(squirrel.Eq{"password": password}).
+		ToSql()
+
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
-	user := models.User{}
-	if rows.Next() {
-		rows.Scan(&user.Id, &user.Login, &user.Email)
-		return user, true
-	}
-
-	return user, false
+	return result, r.DB.Raw(query, args...).Scan(&result).Error
 }
