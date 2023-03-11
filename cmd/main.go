@@ -1,45 +1,54 @@
 package main
 
 import (
-	_ "LearnJapan.com/cmd/router"
-	"LearnJapan.com/pkg/configs"
-	_ "LearnJapan.com/pkg/configs"
+	"LearnJapan.com/configs"
+	"LearnJapan.com/internal/core/repositories"
+	"LearnJapan.com/internal/delivery/controllers"
+	"LearnJapan.com/internal/delivery/middlewares"
+	v1 "LearnJapan.com/internal/delivery/router/v1"
 	"LearnJapan.com/pkg/logger"
-	"LearnJapan.com/pkg/models"
-	"database/sql"
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	pg "LearnJapan.com/pkg/postgres"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func init(){
-	db, err := sql.Open("mysql", configs.Cfg.DBConnectionString)
-	if err != nil{
-		panic("Ошибка подключения к базе")
+func main() {
+	cfg, err := configs.NewConfigs()
+	if err != nil {
+		log.Fatal(err)
 	}
-	
-	dbStatus := db.Ping()
-	if dbStatus != nil{
-		fmt.Println("err: ")
-		fmt.Println(dbStatus)
-		logger.Print("err: " + dbStatus.Error())
-	} else {
-		fmt.Println("db connected")
-		logger.Print("db connected")
+
+	logs := logger.NewLogger(cfg)
+
+	db, err := pg.NewDBPostgres(cfg, logs)
+	if err != nil {
+		logs.Fatal(err)
 	}
-	
-	models.DB = db
-}
 
-func main(){
-	fmt.Println("Сервер запущен")
-	logErr := logger.Print("Сервер запущен")
+	dbInstance, err := db.DB.DB()
+	if err != nil {
+		logs.Fatal(err)
+	}
 
-	if logErr != nil{
-		panic(logErr)
+	driver, err := postgres.WithInstance(dbInstance, &postgres.Config{})
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	migrator, err := migrate.NewWithDatabaseInstance("file://migrations/pg", "postgres", driver)
+	if err != nil {
+		logs.Fatal(err)
+	}
+
+	if err = migrator.Up(); err != nil && err != migrate.ErrNoChange {
+		logs.Fatal(err)
 	}
 
 	ch := make(chan os.Signal, 1)
@@ -49,14 +58,22 @@ func main(){
 	go func() {
 		<-ch
 		signal.Stop(ch)
-		fmt.Println("Сервер остановлен")
-		logger.Print("Сервер остановлен")
+		logs.Info("Application is stopped")
 
-		models.DB.Close()
+		dbInstance.Close()
 
 		os.Exit(0)
 	}()
 
+	sessionRepo := repositories.NewSessionRepo(db)
+	authMiddleware := middlewares.NewAuthMiddleware(sessionRepo)
 
-	http.ListenAndServe("0.0.0.0:8080", nil)
+	mux := gin.New()
+	controller := controllers.NewMainController(db, logs)
+	router := v1.NewRouter(mux, controller, authMiddleware)
+	router.Setup()
+
+	if err := http.ListenAndServe(":8080", router.Mux); err != nil {
+		logs.Fatal(err)
+	}
 }
